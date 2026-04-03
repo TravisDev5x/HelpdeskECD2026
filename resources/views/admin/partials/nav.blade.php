@@ -50,13 +50,19 @@
     );
 
     $isAgendaBitacorasActive = request()->routeIs([
-        'admin.bitacora*', 'admin.bitacoraHost*', 'admin.agenda*',
+        'admin.bitacora*',
+        'admin.bitacoraHost*',
+        'admin.agenda.index',
+        'admin.agenda.store',
+        'admin.agenda.get_calendar',
+        'admin.agenda.get_event',
+        'admin.agenda.update',
     ]);
 
     $canAccessAgendaBitacoras = $user && (
         $user->can('read bitacoras')
         || $user->can('read bitacorasHost')
-        || ($user->hasRole('Admin') && $user->can('read calendar'))
+        || $user->can('read calendar')
     );
 
     // Inventario V2: árbol si hay lectura operativa, «mis asignaciones», o gestión de catálogos/config
@@ -589,15 +595,13 @@
                             </a>
                         </li>
                     @endcan
-                    @role('Admin')
-                        @can('read calendar')
-                            <li class="nav-item">
-                                <a href="{{ route('admin.agenda.index') }}" class="nav-link {{ request()->routeIs('admin.agenda.index') ? 'active' : '' }}">
-                                    <i class="fas fa-calendar-alt nav-icon text-secondary"></i><p>Agenda</p>
-                                </a>
-                            </li>
-                        @endcan
-                    @endrole
+                    @can('read calendar')
+                        <li class="nav-item">
+                            <a href="{{ route('admin.agenda.index') }}" class="nav-link {{ request()->routeIs('admin.agenda.*') ? 'active' : '' }}">
+                                <i class="fas fa-calendar-alt nav-icon text-secondary"></i><p>Agenda</p>
+                            </a>
+                        </li>
+                    @endcan
                 </ul>
             </li>
         @endif
