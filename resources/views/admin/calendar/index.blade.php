@@ -37,10 +37,8 @@
 @endpush
 
 @push('scripts')
-  <script src="{{ asset('vendor/fullcalendar/5.11.5/fc-core.global.min.js') }}"></script>
-  <script src="{{ asset('vendor/fullcalendar/5.11.5/fc-daygrid.global.min.js') }}"></script>
-  <script src="{{ asset('vendor/fullcalendar/5.11.5/fc-timegrid.global.min.js') }}"></script>
-  <script src="{{ asset('vendor/fullcalendar/5.11.5/fc-interaction.global.min.js') }}"></script>
+  {{-- Un solo bundle (fullcalendar/main.min.js); los .global sueltos + plugins:[] rompían processRawCalendarOptions --}}
+  <script src="{{ asset('vendor/fullcalendar/5.11.5/fc-bundle.min.js') }}"></script>
   <script src="{{ asset('vendor/fullcalendar/5.11.5/locales-all.min.js') }}"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -118,7 +116,6 @@
               $('#modalCalendar').modal('show');
             }
           },
-          plugins: [ 'dayGrid', 'timeGrid', 'interaction' ],
         });
         } catch (e) {
           calendarEl.innerHTML = '<div class="alert alert-danger">Error al inicializar el calendario. Si el problema continúa, abra la consola del navegador (F12) y recargue.</div>';

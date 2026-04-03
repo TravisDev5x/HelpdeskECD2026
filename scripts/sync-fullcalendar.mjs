@@ -1,6 +1,6 @@
 /**
- * Copia FullCalendar 5.11.5 desde node_modules a public/vendor (mismo origen que la app, MIME correcto).
- * Ejecutar tras: npm install
+ * Copia FullCalendar 5.11.5 (bundle estándar + CSS + locales) a public/vendor.
+ * Usar main.min.js del paquete «fullcalendar» (incluye plugins); no mezclar con @fullcalendar/core suelto.
  */
 import fs from 'fs';
 import path from 'path';
@@ -12,10 +12,7 @@ const dest = path.join(root, 'public', 'vendor', 'fullcalendar', '5.11.5');
 
 const copies = [
   ['node_modules/fullcalendar/main.min.css', 'main.min.css'],
-  ['node_modules/@fullcalendar/core/main.global.min.js', 'fc-core.global.min.js'],
-  ['node_modules/@fullcalendar/daygrid/main.global.min.js', 'fc-daygrid.global.min.js'],
-  ['node_modules/@fullcalendar/timegrid/main.global.min.js', 'fc-timegrid.global.min.js'],
-  ['node_modules/@fullcalendar/interaction/main.global.min.js', 'fc-interaction.global.min.js'],
+  ['node_modules/fullcalendar/main.min.js', 'fc-bundle.min.js'],
   ['node_modules/fullcalendar/locales-all.min.js', 'locales-all.min.js'],
 ];
 
@@ -28,4 +25,17 @@ for (const [relSrc, name] of copies) {
   }
   fs.copyFileSync(src, path.join(dest, name));
 }
-console.log('FullCalendar copiado a', dest);
+
+// Quitar JS antiguos (carga modular que rompía processRawCalendarOptions)
+for (const legacy of [
+  'fc-core.global.min.js',
+  'fc-daygrid.global.min.js',
+  'fc-timegrid.global.min.js',
+  'fc-interaction.global.min.js',
+]) {
+  const p = path.join(dest, legacy);
+  if (fs.existsSync(p)) {
+    fs.unlinkSync(p);
+  }
+}
+console.log('FullCalendar (bundle estándar) copiado a', dest);
