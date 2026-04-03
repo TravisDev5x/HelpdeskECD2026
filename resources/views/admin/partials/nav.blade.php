@@ -25,8 +25,7 @@
     $isConfigActive = request()->routeIs([
         'admin.companies*', 'admin.sedes*', 'admin.ubicaciones*', 'admin.departments*',
         'admin.positions*', 'admin.failures*', 'admin.campaigns*', 'did*',
-        'admin.assets*', 'admin.tests*', 'admin.nivel', 'admin.permissions*',
-        'admin.roles*',
+        'admin.assets*', 'admin.tests*', 'admin.nivel',
     ]);
 
     $canAccessConfig = $user && (
@@ -35,8 +34,19 @@
         $user->can('modulo.ubicaciones') || $user->can('read departments') ||
         $user->can('read positions') || $user->can('read failures') ||
         $user->can('read campaigns') || $user->can('modulo.did') ||
-        $user->can('read assets') || $user->can('read tests') ||
-        $user->can('read roles')
+        $user->can('read assets') || $user->can('read tests')
+    );
+
+    $isAdminUsersSubtreeActive = request()->is('admin/users*') || request()->routeIs('profile');
+    $isAdminRolesSubtreeActive = request()->is('admin/roles*');
+    $isUsersRolesTreeActive = $isAdminUsersSubtreeActive
+        || request()->routeIs('admin.permissions*')
+        || $isAdminRolesSubtreeActive;
+
+    $canAccessUsersRoles = $user && (
+        $user->can('read users')
+        || $user->can('read roles')
+        || $user->hasRole('Admin')
     );
 
     $isAgendaBitacorasActive = request()->routeIs([
@@ -63,6 +73,19 @@
     $isReportsTreeActive = request()->is('admin/reports*')
         || request()->routeIs('inventory.v2.monitor', 'inventory.monitor.*');
 
+    $isOperacionIncidentsTreeActive = request()->is('admin/incidents*', 'admin/contenido/ctg*', 'admin/ciberseguridad*');
+
+    $isOperacionTreeActive = request()->routeIs('home', 'admin.services.index', 'admin.services.create')
+        || $isReportsTreeActive
+        || $isOperacionIncidentsTreeActive;
+
+    $canAccessOperacionSection = $user && (
+        $user->can('read services')
+        || $user->can('read reports')
+        || $user->can('create service')
+        || $user->can('read incidents')
+    );
+
     // Inventario V2 (menú): rutas que abren/resaltan el árbol (monitoreo: inventory.v2.monitor bajo Reportes)
     $inventoryV2TreeRoutes = [
         'inventory.v2.index',
@@ -87,67 +110,98 @@
         {{-- BLOQUE: OPERACIÓN DIARIA                   --}}
         {{-- ========================================== --}}
         <li class="nav-header text-muted" style="font-size: 0.8rem;">OPERACIÓN</li>
-        
-        @can('read services')
-            <li class="nav-item">
-                <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
-                    <i class="nav-icon fas fa-tachometer-alt text-secondary"></i>
-                    <p>Inicio</p>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('admin.services.index') }}" class="nav-link {{ request()->routeIs('admin.services.index') ? 'active' : '' }}">
-                    <i class="nav-icon fas fa-check-double text-secondary"></i>
-                    <p>Servicios Finalizados</p>
-                </a>
-            </li>
-        @endcan
 
-        {{-- REPORTES --}}
-        @can('read reports')
-            <li class="nav-item has-treeview {{ $isReportsTreeActive ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ $isReportsTreeActive ? 'active' : '' }}">
-                    <i class="nav-icon fas fa-chart-line text-secondary"></i>
-                    <p>Reportes <i class="right fas fa-angle-left"></i></p>
+        @if($canAccessOperacionSection)
+            <li class="nav-item has-treeview {{ $isOperacionTreeActive ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ $isOperacionTreeActive ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-clipboard-list text-secondary"></i>
+                    <p>Operación <i class="right fas fa-angle-left"></i></p>
                 </a>
                 <ul class="nav nav-treeview">
-                    @can('read reports ticket')
+                    @can('read services')
                         <li class="nav-item">
-                            <a href="{{ route('admin.reports.index') }}" class="nav-link {{ request()->routeIs('admin.reports.index') ? 'active' : '' }}">
-                                <i class="fas fa-ticket-alt nav-icon text-secondary"></i>
-                                <p>Tickets</p>
+                            <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-tachometer-alt text-secondary"></i>
+                                <p>Inicio</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.services.index') }}" class="nav-link {{ request()->routeIs('admin.services.index') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-check-double text-secondary"></i>
+                                <p>Servicios Finalizados</p>
                             </a>
                         </li>
                     @endcan
-                    @can('read reports inventory')
+
+                    @can('read reports')
+                        <li class="nav-item has-treeview {{ $isReportsTreeActive ? 'menu-open' : '' }}">
+                            <a href="#" class="nav-link {{ $isReportsTreeActive ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-chart-line text-secondary"></i>
+                                <p>Reportes <i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                @can('read reports ticket')
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.reports.index') }}" class="nav-link {{ request()->routeIs('admin.reports.index') ? 'active' : '' }}">
+                                            <i class="fas fa-ticket-alt nav-icon text-secondary"></i>
+                                            <p>Tickets</p>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('read reports inventory')
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.reports.inventory') }}" class="nav-link {{ request()->routeIs('admin.reports.inventory') ? 'active' : '' }}">
+                                            <i class="fas fa-boxes nav-icon text-secondary"></i>
+                                            <p>Detalle Inventario</p>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('read inventory monitor')
+                                    <li class="nav-item">
+                                        <a href="{{ route('inventory.v2.monitor') }}" class="nav-link {{ request()->routeIs('inventory.v2.monitor', 'inventory.monitor.*') ? 'active' : '' }}">
+                                            <i class="fas fa-chart-line nav-icon text-info"></i>
+                                            <p>Monitoreo inventario V2</p>
+                                        </a>
+                                    </li>
+                                @endcan
+                            </ul>
+                        </li>
+                    @endcan
+
+                    @can('create service')
                         <li class="nav-item">
-                            <a href="{{ route('admin.reports.inventory') }}" class="nav-link {{ request()->routeIs('admin.reports.inventory') ? 'active' : '' }}">
-                                <i class="fas fa-boxes nav-icon text-secondary"></i>
-                                <p>Detalle Inventario</p>
+                            <a href="{{ route('admin.services.create') }}" class="nav-link {{ request()->routeIs('admin.services.create') ? 'active' : '' }}">
+                                <i class="fas fa-plus-circle nav-icon text-secondary"></i>
+                                <p>Nuevo Ticket</p>
                             </a>
                         </li>
                     @endcan
-                    @can('read inventory monitor')
-                        <li class="nav-item">
-                            <a href="{{ route('inventory.v2.monitor') }}" class="nav-link {{ request()->routeIs('inventory.v2.monitor', 'inventory.monitor.*') ? 'active' : '' }}">
-                                <i class="fas fa-chart-line nav-icon text-info"></i>
-                                <p>Monitoreo inventario V2</p>
+
+                    @can('read incidents')
+                        <li class="nav-item has-treeview {{ $isOperacionIncidentsTreeActive ? 'menu-open' : '' }}">
+                            <a href="#" class="nav-link {{ $isOperacionIncidentsTreeActive ? 'active' : '' }}">
+                                <i class="fas fa-exclamation-triangle nav-icon text-secondary"></i>
+                                <p>Incidencias <i class="right fas fa-angle-left"></i></p>
                             </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.incidents.index') }}" class="nav-link {{ request()->routeIs('admin.incidents.index') ? 'active' : '' }}">
+                                        <i class="fa fa-list-alt nav-icon text-secondary"></i>
+                                        <p>Ver incidencias</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('ciberseguridad.incidencias') }}" class="nav-link {{ request()->routeIs('ciberseguridad.incidencias') ? 'active' : '' }}">
+                                        <i class="fa fa-shield-virus nav-icon text-secondary"></i>
+                                        <p>Ciberseguridad</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     @endcan
                 </ul>
             </li>
-        @endcan
-
-        {{-- NUEVO TICKET --}}
-        @can('create service')
-            <li class="nav-item">
-                <a href="{{ route('admin.services.create') }}" class="nav-link {{ request()->routeIs('admin.services.create') ? 'active' : '' }}">
-                    <i class="fas fa-plus-circle nav-icon text-secondary"></i>
-                    <p>Nuevo Ticket</p>
-                </a>
-            </li>
-        @endcan
+        @endif
 
         {{-- ========================================== --}}
         {{-- BLOQUE: INVENTARIO                         --}}
@@ -338,59 +392,73 @@
             </li>
         @endcan
 
-        {{-- INCIDENCIAS --}}
-        @can('read incidents')
-            <li class="nav-item has-treeview {{ request()->is('admin/incidents*', 'admin/contenido/ctg*', 'admin/ciberseguridad*') ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ request()->is('admin/incidents*', 'admin/contenido/ctg*', 'admin/ciberseguridad*') ? 'active' : '' }}">
-                    <i class="fas fa-exclamation-triangle nav-icon text-secondary"></i>
-                    <p>Incidencias <i class="right fas fa-angle-left"></i></p>
+        {{-- ========================================== --}}
+        {{-- BLOQUE: USUARIOS Y ROLES                   --}}
+        {{-- ========================================== --}}
+        @if($canAccessUsersRoles)
+            <li class="nav-header text-muted" style="font-size: 0.8rem;">USUARIOS Y ROLES</li>
+            <li class="nav-item has-treeview {{ $isUsersRolesTreeActive ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ $isUsersRolesTreeActive ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-user-shield text-secondary"></i>
+                    <p>Usuarios y Roles <i class="right fas fa-angle-left"></i></p>
                 </a>
                 <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                        <a href="{{ route('admin.incidents.index') }}" class="nav-link {{ request()->routeIs('admin.incidents.index') ? 'active' : '' }}">
-                            <i class="fa fa-list-alt nav-icon text-secondary"></i>
-                            <p>Ver incidencias</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('ciberseguridad.incidencias') }}" class="nav-link {{ request()->routeIs('ciberseguridad.incidencias') ? 'active' : '' }}">
-                            <i class="fa fa-shield-virus nav-icon text-secondary"></i>
-                            <p>Ciberseguridad</p>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-        @endcan
-
-        {{-- USUARIOS --}}
-        @can('read users')
-            <li class="nav-item has-treeview {{ request()->is('admin/users*') ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ request()->is('admin/users*') ? 'active' : '' }}">
-                    <i class="fas fa-users nav-icon text-secondary"></i>
-                    <p>Usuarios <i class="right fas fa-angle-left"></i></p>
-                </a>
-                <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                        <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.index') && ! request()->boolean('trashed') && ! request()->boolean('pending') ? 'active' : '' }}">
-                            <i class="fa fa-list nav-icon text-secondary"></i>
-                            <p>Ver todos los usuarios</p>
-                        </a>
-                    </li>
-
-                    @can('check activos')
-                        @isset($countChecks)
-                            <li class="nav-item">
-                                <a href="{{ route('admin.users.index', ['pending' => 1]) }}" class="nav-link {{ request()->routeIs('admin.users.index') && request()->boolean('pending') ? 'active' : '' }}">
-                                    <button class="btn-sm border-circle bg-secondary w-100 text-left">
-                                        <i class="fa fa-bell mr-1"></i> Pendientes: {{ $countChecks }}
-                                    </button>
-                                </a>
-                            </li>
-                        @endisset
+                    @can('read users')
+                        <li class="nav-item has-treeview {{ $isAdminUsersSubtreeActive ? 'menu-open' : '' }}">
+                            <a href="#" class="nav-link {{ $isAdminUsersSubtreeActive ? 'active' : '' }}">
+                                <i class="fas fa-users nav-icon text-secondary"></i>
+                                <p>Usuarios <i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.index') && ! request()->boolean('trashed') && ! request()->boolean('pending') ? 'active' : '' }}">
+                                        <i class="fa fa-list nav-icon text-secondary"></i>
+                                        <p>Ver todos los usuarios</p>
+                                    </a>
+                                </li>
+                                @can('check activos')
+                                    @isset($countChecks)
+                                        <li class="nav-item">
+                                            <a href="{{ route('admin.users.index', ['pending' => 1]) }}" class="nav-link {{ request()->routeIs('admin.users.index') && request()->boolean('pending') ? 'active' : '' }}">
+                                                <button class="btn-sm border-circle bg-secondary w-100 text-left">
+                                                    <i class="fa fa-bell mr-1"></i> Pendientes: {{ $countChecks }}
+                                                </button>
+                                            </a>
+                                        </li>
+                                    @endisset
+                                @endcan
+                            </ul>
+                        </li>
+                    @endcan
+                    @role('Admin')
+                        <li class="nav-item">
+                            <a href="{{ route('admin.permissions.index') }}" class="nav-link {{ request()->routeIs('admin.permissions*') ? 'active' : '' }}">
+                                <i class="fas fa-key nav-icon text-secondary"></i><p>Permisos</p>
+                            </a>
+                        </li>
+                    @endrole
+                    @can('read roles')
+                        <li class="nav-item has-treeview {{ $isAdminRolesSubtreeActive ? 'menu-open' : '' }}">
+                            <a href="#" class="nav-link {{ $isAdminRolesSubtreeActive ? 'active' : '' }}">
+                                <i class="fas fa-user-tag nav-icon text-secondary"></i><p>Roles <i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.roles.index') }}" class="nav-link {{ request()->routeIs('admin.roles.index') ? 'active' : '' }}">
+                                        <i class="fa fa-list nav-icon text-secondary"></i><p>Ver todos los roles</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.roles.create') }}" class="nav-link {{ request()->routeIs('admin.roles.create') ? 'active' : '' }}">
+                                        <i class="fas fa-plus-circle nav-icon text-secondary"></i><p>Crear un rol</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                     @endcan
                 </ul>
             </li>
-        @endcan
+        @endif
 
         {{-- DIRECTORIO --}}
         @can('read directory')
@@ -562,32 +630,6 @@
                             <a href="{{ route('admin.nivel') }}" class="nav-link {{ request()->routeIs('admin.nivel') ? 'active' : '' }}">
                                 <i class="fa fa-circle nav-icon text-secondary"></i><p>Pruebas Nivel 2</p>
                             </a>
-                        </li>
-                    @endcan
-                    @role('Admin')
-                        <li class="nav-item">
-                            <a href="{{ route('admin.permissions.index') }}" class="nav-link {{ request()->routeIs('admin.permissions*') ? 'active' : '' }}">
-                                <i class="fas fa-key nav-icon text-secondary"></i><p>Permisos</p>
-                            </a>
-                        </li>
-                    @endrole
-                    @can('read roles')
-                        <li class="nav-item has-treeview {{ request()->is('admin/roles*') ? 'menu-open' : '' }}">
-                            <a href="#" class="nav-link {{ request()->is('admin/roles*') ? 'active' : '' }}">
-                                <i class="fas fa-user-tag nav-icon text-secondary"></i><p>Roles <i class="right fas fa-angle-left"></i></p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.roles.index') }}" class="nav-link {{ request()->routeIs('admin.roles.index') ? 'active' : '' }}">
-                                        <i class="fa fa-list nav-icon text-secondary"></i><p>Ver todos los roles</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.roles.create') }}" class="nav-link {{ request()->routeIs('admin.roles.create') ? 'active' : '' }}">
-                                        <i class="fas fa-plus-circle nav-icon text-secondary"></i><p>Crear un rol</p>
-                                    </a>
-                                </li>
-                            </ul>
                         </li>
                     @endcan
                 </ul>
