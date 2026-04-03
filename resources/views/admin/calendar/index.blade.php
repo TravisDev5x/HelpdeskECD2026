@@ -26,9 +26,6 @@
       <span class="d-inline-block"><span class="badge align-middle" style="background:#6f42c1">&nbsp;</span> Equipo (visible según permisos de rol)</span>
     @endif
   </p>
-  @if(!$canReadTeamCalendar)
-    <p class="alert alert-light border small mb-2">No tiene permiso para ver el calendario de equipo; solo verá sus eventos personales.</p>
-  @endif
   <div id="calendar" class="mb-3"></div>
   @include('admin.calendar.create')
   @include('admin.calendar.update')

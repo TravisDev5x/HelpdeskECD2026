@@ -143,12 +143,34 @@ class CalendarController extends Controller
             return false;
         }
 
+        if ($this->userHasAdminRole()) {
+            return true;
+        }
+
         return $user->can('read team calendar') || $user->can('manage team calendar');
     }
 
     private function userCanManageTeam(): bool
     {
-        return (bool) auth()->user()?->can('manage team calendar');
+        $user = auth()->user();
+        if (! $user) {
+            return false;
+        }
+
+        if ($this->userHasAdminRole()) {
+            return true;
+        }
+
+        return $user->can('manage team calendar');
+    }
+
+    /**
+     * Respaldo: el rol «Admin» del seeder debe ver y gestionar calendario de equipo aunque
+     * la matriz Spatie no tenga aún sincronizados los permisos nuevos (migración o caché).
+     */
+    private function userHasAdminRole(): bool
+    {
+        return (bool) auth()->user()?->hasRole('Admin');
     }
 
     private function userCanView(Calendar $calendar): bool

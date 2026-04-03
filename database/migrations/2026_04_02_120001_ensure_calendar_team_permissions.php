@@ -18,16 +18,18 @@ return new class extends Migration
     {
         app()['cache']->forget('spatie.permission.cache');
 
+        $guard = config('auth.defaults.guard', 'web');
+
         foreach (self::PERMISSIONS as $name) {
             Permission::firstOrCreate(
-                ['name' => $name, 'guard_name' => config('auth.defaults.guard', 'web')]
+                ['name' => $name, 'guard_name' => $guard]
             );
         }
 
-        $admin = Role::where('name', 'Admin')->first();
+        $admin = Role::where('name', 'Admin')->where('guard_name', $guard)->first();
         if ($admin) {
             foreach (self::PERMISSIONS as $name) {
-                $p = Permission::where('name', $name)->first();
+                $p = Permission::where('name', $name)->where('guard_name', $guard)->first();
                 if ($p && ! $admin->hasPermissionTo($p)) {
                     $admin->givePermissionTo($p);
                 }
