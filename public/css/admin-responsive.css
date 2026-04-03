@@ -1,0 +1,206 @@
+/**
+ * Capa responsive — AdminLTE 3 + Bootstrap 4
+ * Mejoras fluidas (espaciado, tablas, toques, modales) sin cambiar el lenguaje visual del tema.
+ */
+
+:root {
+    /* Espaciado horizontal del área de contenido (crece suavemente entre móvil y escritorio) */
+    --helpdesk-content-pad-x: clamp(0.5rem, 2.2vw, 1.25rem);
+    --helpdesk-content-pad-y: clamp(0.65rem, 1.8vw, 1.15rem);
+    /* Radio alineado con tarjetas Bootstrap / AdminLTE */
+    --helpdesk-radius: 0.25rem;
+}
+
+/* Scroll suave solo si el usuario no pide reducir movimiento */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    .main-sidebar,
+    .modal .modal-dialog,
+    .main-header .nav-link {
+        transition: none !important;
+    }
+}
+
+/* Áreas seguras (notch / barra inferior en móviles) — suma al padding nativo de AdminLTE */
+.wrapper {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.main-header.navbar {
+    padding-left: max(0, env(safe-area-inset-left, 0px));
+    padding-right: max(0, env(safe-area-inset-right, 0px));
+}
+
+/* Contenedor principal: padding fluido + safe area horizontal */
+.content-wrapper > .content {
+    padding-left: max(var(--helpdesk-content-pad-x), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--helpdesk-content-pad-x), env(safe-area-inset-right, 0px));
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+    /* Evita desbordes raros con filas Livewire muy anchas */
+    min-width: 0;
+}
+
+.content-wrapper > .content-header {
+    padding-left: max(var(--helpdesk-content-pad-x), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--helpdesk-content-pad-x), env(safe-area-inset-right, 0px));
+}
+
+.content-header h1,
+.content-header h1.m-0 {
+    font-size: clamp(1.1rem, 2.4vw, 1.65rem);
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+.content-header .breadcrumb {
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+}
+
+/* Sidebar: transición un poco más explícita al abrir/cerrar (AdminLTE ya anima margin) */
+@media (prefers-reduced-motion: no-preference) {
+    .main-sidebar {
+        transition: margin-left 0.28s ease-in-out, box-shadow 0.28s ease, transform 0.28s ease-in-out;
+    }
+}
+
+/* Objetivos táctiles mínimos en barra superior (WCAG ~44px) */
+.main-header .navbar-nav .nav-link {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-header .navbar-nav .nav-link[data-widget="pushmenu"] {
+    min-width: 2.75rem;
+}
+
+/* Menú lateral: enlaces más cómodos en móvil / tablet */
+@media (max-width: 991.98px) {
+    .nav-sidebar .nav-link {
+        min-height: 2.65rem;
+        align-items: center;
+    }
+    .nav-sidebar .nav-treeview .nav-link {
+        min-height: 2.35rem;
+    }
+}
+
+/* Tablas anchas: scroll táctil y contorno discreto tipo AdminLTE */
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--helpdesk-radius);
+    border: 1px solid #dee2e6;
+    background-color: #fff;
+}
+
+body.dark-mode .table-responsive,
+html[data-theme='dark'] .table-responsive {
+    border-color: #56606a;
+    background-color: transparent;
+}
+
+.table-responsive > .table {
+    margin-bottom: 0;
+}
+
+/* Tarjetas: un poco más compactas en móvil, sin romper cards de AdminLTE */
+@media (max-width: 575.98px) {
+    .card-body {
+        padding: 0.85rem;
+    }
+    .card-header,
+    .card-footer {
+        padding: 0.65rem 0.85rem;
+    }
+    .card-title {
+        font-size: 1rem;
+    }
+}
+
+/* Transiciones muy suaves en elementos interactivos habituales (no invasivas) */
+@media (prefers-reduced-motion: no-preference) {
+    .btn,
+    .page-link,
+    .nav-sidebar .nav-link:not(.active) {
+        transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+}
+
+/* iOS: evita zoom al enfocar inputs si el texto base es muy pequeño */
+@media (max-width: 575.98px) {
+    select.form-control,
+    .custom-select,
+    textarea.form-control,
+    input.form-control:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
+        font-size: max(1rem, 16px);
+    }
+}
+
+/* Modales: márgenes seguros en pantallas estrechas */
+@media (max-width: 575.98px) {
+    .modal-dialog {
+        margin: 0.5rem auto;
+        max-width: calc(100% - 1rem);
+    }
+    .modal-dialog.modal-dialog-centered {
+        min-height: calc(100% - 1rem);
+    }
+}
+
+/* Dropdowns largos: scroll interno en viewport bajo */
+@media (max-width: 991.98px) {
+    .dropdown-menu {
+        max-height: min(70vh, 24rem);
+        overflow-y: auto;
+    }
+}
+
+/* Footer: lectura cómoda en móvil */
+@media (max-width: 575.98px) {
+    .main-footer {
+        padding: 0.75rem var(--helpdesk-content-pad-x);
+        text-align: center;
+        font-size: 0.875rem;
+    }
+    .main-footer .float-right {
+        float: none !important;
+        display: block;
+        margin-top: 0.35rem;
+    }
+}
+
+/* Imágenes y contenido embebido dentro del área principal */
+.content img,
+.content svg,
+.content video,
+.content iframe {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Fila Bootstrap: permite que columnas flex se encojan y no rompan el ancho */
+.content .row {
+    min-width: 0;
+}
+
+/* Utilidad opcional: filas de filtros que se envuelven con buen espacio */
+@media (max-width: 767.98px) {
+    .content .form-row > [class*='col-'],
+    .content .row > [class*='col-'] {
+        margin-bottom: 0.5rem;
+    }
+    .content .form-row > [class*='col-']:last-child,
+    .content .row > [class*='col-']:last-child {
+        margin-bottom: 0;
+    }
+}

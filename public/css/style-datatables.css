@@ -1,0 +1,49 @@
+table.dataTable.dtr-inline.collapsed>tbody>tr[role="row"]>td:first-child:before {
+  top: 7px!important ; 
+}
+
+/* DataTables dentro de cards: evitar que el texto (p. ej. tabla vacía) quede recortado */
+.card-body .dataTables_wrapper {
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+/* Los .row internos de DT usan márgenes negativos de Bootstrap y suelen “comer” bordes y texto */
+.card-body .dataTables_wrapper .row {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.card-body .dataTables_wrapper .col-sm-12 {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.card.card-outline > .card-body:has(.dataTables_wrapper) {
+  overflow: visible !important;
+}
+
+.card-body .dataTables_scrollBody {
+  min-height: 4rem;
+}
+
+table.dataTable td.dataTables_empty {
+  padding: 1.15rem 1rem !important;
+  vertical-align: middle !important;
+  line-height: 1.5 !important;
+  white-space: normal !important;
+}
+
+/* Filas vacías manuales (colspan) en vistas Blade, no solo dataTables_empty */
+.card-body table.dataTable tbody td[colspan] {
+  padding: 1rem 1rem !important;
+  vertical-align: middle !important;
+  line-height: 1.5 !important;
+  white-space: normal !important;
+}
+
+.card-body .table-responsive {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}

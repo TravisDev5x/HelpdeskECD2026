@@ -1,0 +1,372 @@
+/**
+ * AdminLTE - Tema consistente claro/oscuro
+ * Iconos, cards, tablas, modales, alertas y componentes unificados
+ */
+
+/* Tipografía: Roboto (hoja cargada en admin/layout) */
+body,
+.wrapper,
+.content-wrapper,
+.main-sidebar,
+.main-header {
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ========== UTILIDADES GLOBALES ========== */
+.text-xs { font-size: 0.75rem; }
+.text-sm { font-size: 0.875rem; }
+.card-title .fas,
+.card-title .far,
+.card-title .fab { margin-right: 0.35rem; }
+.btn .fas, .btn .far, .btn .fab { margin-right: 0.25rem; }
+.btn.btn-sm .fas, .btn.btn-sm .far { margin-right: 0.15rem; }
+.table .fas, .table .far { opacity: 0.9; }
+
+/* Checkbox/radio coherente */
+.custom-control-label::before { border-color: #adb5bd; }
+.custom-control-input:checked ~ .custom-control-label::before {
+    border-color: #007bff;
+    background-color: #007bff;
+}
+body.dark-mode .custom-control-label { color: #e9ecef; }
+body.dark-mode .custom-control-label::before { border-color: #6c757d; background-color: #3a4047; }
+body.dark-mode .custom-control-input:checked ~ .custom-control-label::before {
+    border-color: #007bff;
+    background-color: #007bff;
+}
+
+/* ========== CONTENIDO Y CABECERAS ========== */
+body.dark-mode .content-header { background-color: transparent !important; border-color: #495057; }
+body.dark-mode .content-header h1,
+body.dark-mode .content-header .breadcrumb-item { color: #e9ecef !important; }
+body.dark-mode .content-header .breadcrumb-item a { color: #6ea8fe !important; }
+body.dark-mode .content-header .breadcrumb-item a:hover { color: #8fc1ff !important; }
+body.dark-mode .content-header .breadcrumb-item.active { color: #adb5bd !important; }
+body.dark-mode .content-header .breadcrumb-item a { color: #6ea8fe; }
+body.dark-mode .content-header .breadcrumb-item.active { color: #adb5bd; }
+body.dark-mode .breadcrumb-item + .breadcrumb-item::before { color: #6c757d; }
+
+/* ========== CARDS (títulos y espaciado unificados) ========== */
+.card-header { padding: 0.5rem 1rem; }
+.card-header .card-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0;
+    line-height: 1.4;
+}
+.card .card-body.p-0 .table { margin-bottom: 0; }
+body.dark-mode .card { background-color: #3f474e; color: #e9ecef; border-color: #495057; }
+body.dark-mode .card-header {
+    background-color: rgba(0,0,0,0.15);
+    border-bottom-color: #495057;
+    color: #fff;
+}
+body.dark-mode .card-title { color: #fff; }
+body.dark-mode .card-body { color: #dee2e6; }
+body.dark-mode .card-footer { border-top-color: #495057; background-color: rgba(0,0,0,0.1); }
+body.dark-mode .card-primary.card-outline { border-color: #007bff; }
+body.dark-mode .card-secondary.card-outline { border-color: #6c757d; }
+body.dark-mode .card-tools .btn-tool { color: #adb5bd; }
+body.dark-mode .card-tools .btn-tool:hover { color: #fff; }
+
+/* ========== TABLAS ========== */
+body.dark-mode .table { color: #dee2e6; }
+body.dark-mode .table-bordered { border-color: #495057; }
+body.dark-mode .table-bordered td,
+body.dark-mode .table-bordered th { border-color: #495057 !important; }
+body.dark-mode .thead-dark th { background-color: #23272b; border-color: #343a40; color: #fff; }
+body.dark-mode .thead-light th { background-color: #3a4047; border-color: #495057; color: #e9ecef; }
+body.dark-mode .table-striped tbody tr:nth-of-type(odd) { background-color: rgba(255,255,255,0.04); }
+body.dark-mode .table-hover tbody tr:hover { background-color: rgba(255,255,255,0.08); color: #fff; }
+body.dark-mode .table-warning,
+body.dark-mode .table-warning > td { background-color: #584d28 !important; color: #fff; border-color: #6c5f35; }
+body.dark-mode .table-responsive { color: inherit; }
+.table-vcenter td, .table-vcenter th { vertical-align: middle; }
+
+/* ========== MODALES — animaciones (Bootstrap + overlay Livewire) ========== */
+@keyframes modal-livewire-backdrop-in {
+    from { background-color: rgba(0, 0, 0, 0); }
+    to { background-color: rgba(0, 0, 0, 0.55); }
+}
+
+@keyframes modal-dialog-in {
+    from {
+        opacity: 0;
+        transform: translateY(1rem) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Transición estándar de modales Bootstrap: reemplaza el slide -50px por entrada suave */
+.modal.fade .modal-dialog {
+    transition:
+        transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.26s ease-out !important;
+    transform: translateY(0.85rem) scale(0.97) !important;
+    opacity: 0;
+}
+
+.modal.show .modal-dialog {
+    transform: translateY(0) scale(1) !important;
+    opacity: 1;
+}
+
+/* Diálogo animado sin depender del toggle fade de Bootstrap (confirmaciones Livewire) */
+.modal.modal-livewire-confirm.fade .modal-dialog {
+    transition: none !important;
+}
+
+.modal.modal-livewire-confirm.show .modal-dialog {
+    animation: modal-dialog-in 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Fondo del overlay Livewire (sin .modal-backdrop) */
+.modal.modal-livewire-confirm.show {
+    background-color: rgba(0, 0, 0, 0);
+    animation: modal-livewire-backdrop-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-backdrop.fade {
+    transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+        backdrop-filter 0.35s ease,
+        -webkit-backdrop-filter 0.35s ease;
+}
+
+@supports (backdrop-filter: blur(3px)) {
+    .modal-backdrop.show {
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+}
+
+/* Contenedor: sombra más definida al abrir */
+.modal-content {
+    border-radius: 0.45rem;
+    box-shadow: 0 0.65rem 2rem rgba(0, 0, 0, 0.14);
+}
+
+@media (min-width: 576px) {
+    .modal-content {
+        box-shadow: 0 0.85rem 2.35rem rgba(0, 0, 0, 0.16);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .modal.fade .modal-dialog {
+        transition: opacity 0.12s ease !important;
+        transform: none !important;
+    }
+
+    .modal.show .modal-dialog {
+        opacity: 1;
+        transform: none !important;
+    }
+
+    .modal.modal-livewire-confirm.show {
+        animation: none;
+        background-color: rgba(0, 0, 0, 0.55);
+    }
+
+    .modal.modal-livewire-confirm.show .modal-dialog {
+        animation: none;
+    }
+
+    .modal-backdrop.fade {
+        transition: opacity 0.12s ease;
+    }
+}
+
+/* ========== MODALES ========== */
+body.dark-mode .modal-content {
+    background-color: #343a40;
+    color: #e9ecef;
+    border: 1px solid #495057;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.5);
+}
+body.dark-mode .modal-header {
+    border-bottom-color: #495057;
+    background-color: rgba(0,0,0,0.2);
+    color: #fff;
+}
+body.dark-mode .modal-body { background-color: #343a40; color: #dee2e6; }
+body.dark-mode .modal-footer {
+    border-top-color: #495057;
+    background-color: rgba(0,0,0,0.2);
+}
+body.dark-mode .modal .close { color: #fff !important; opacity: 0.85; text-shadow: none; }
+body.dark-mode .modal .close:hover { color: #fff; opacity: 1; }
+
+/* ========== FORMULARIOS ========== */
+body.dark-mode .form-control,
+body.dark-mode .custom-select {
+    background-color: #3a4047 !important;
+    border-color: #6c757d !important;
+    color: #e9ecef !important;
+}
+/* Flecha del select: en oscuro el SVG por defecto (#343a40) coincide con el fondo */
+html.dark-mode body .custom-select,
+body.dark-mode .custom-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3e%3cpath fill='%23dee2e6' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.75rem center !important;
+    background-size: 8px 10px !important;
+}
+body.dark-mode .form-control::placeholder { color: #868e96; }
+body.dark-mode .form-control:focus {
+    background-color: #43494e !important;
+    border-color: #007bff !important;
+    color: #fff;
+}
+body.dark-mode .input-group-text {
+    background-color: #495057 !important;
+    border-color: #6c757d !important;
+    color: #e9ecef !important;
+}
+body.dark-mode label { color: #dee2e6; }
+body.dark-mode .form-group small.text-muted { color: #adb5bd !important; }
+/* Texto de ayuda estándar en formularios */
+.form-text.help-text,
+.help-text { font-size: 0.8125rem; margin-top: 0.2rem; margin-bottom: 0; display: block; }
+body.dark-mode .form-text.text-muted,
+body.dark-mode .help-text.text-muted { color: #adb5bd !important; }
+
+/* ========== ALERTAS (contraste mejorado en ambos temas) ========== */
+.alert-success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+.alert-danger { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+.alert-warning { background-color: #fff3cd; border-color: #ffeeba; color: #856404; }
+.alert-info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+body.dark-mode .alert-success {
+    background-color: #1e4620;
+    border-color: #2d6a30;
+    color: #c8e6c9;
+}
+body.dark-mode .alert-danger {
+    background-color: #4a2020;
+    border-color: #6b2a2a;
+    color: #ffcdd2;
+}
+body.dark-mode .alert-warning {
+    background-color: #4a3f1f;
+    border-color: #6b5a2a;
+    color: #fff9c4;
+}
+body.dark-mode .alert-info {
+    background-color: #1e3a4a;
+    border-color: #2d526b;
+    color: #b3e5fc;
+}
+body.dark-mode .alert .close { color: inherit; opacity: 0.8; }
+body.dark-mode .alert-secondary { background-color: #3a4047; border-color: #495057; color: #dee2e6; }
+
+/* ========== BOTONES OUTLINE EN DARK ========== */
+body.dark-mode .btn-outline-primary { border-color: #007bff; color: #6ea8fe; }
+body.dark-mode .btn-outline-primary:hover { background-color: #007bff; color: #fff; border-color: #007bff; }
+body.dark-mode .btn-outline-secondary { border-color: #6c757d; color: #adb5bd; }
+body.dark-mode .btn-outline-secondary:hover { background-color: #6c757d; color: #fff; }
+body.dark-mode .btn-outline-success { border-color: #28a745; color: #75c687; }
+body.dark-mode .btn-outline-success:hover { background-color: #28a745; color: #fff; }
+body.dark-mode .btn-outline-danger { border-color: #dc3545; color: #f5a2a9; }
+body.dark-mode .btn-outline-danger:hover { background-color: #dc3545; color: #fff; }
+body.dark-mode .btn-outline-warning { border-color: #ffc107; color: #ffda6a; }
+body.dark-mode .btn-outline-warning:hover { background-color: #ffc107; color: #212529; }
+body.dark-mode .btn-outline-info { border-color: #17a2b8; color: #6edff6; }
+body.dark-mode .btn-outline-info:hover { background-color: #17a2b8; color: #fff; }
+body.dark-mode .btn-outline-dark { border-color: #343a40; color: #adb5bd; }
+body.dark-mode .btn-outline-dark:hover { background-color: #495057; color: #fff; }
+body.dark-mode .btn-default { background-color: #495057; border-color: #6c757d; color: #fff; }
+body.dark-mode .btn-default:hover { background-color: #5a6268; color: #fff; }
+
+/* ========== BG-LIGHT Y CALL-OUT ========== */
+body.dark-mode .bg-light {
+    background-color: #3a4047 !important;
+    color: #dee2e6 !important;
+    border-color: #495057;
+}
+body.dark-mode .callout { border-left-color: #6c757d; }
+body.dark-mode .callout.callout-info { background-color: #1e3a4a; border-left-color: #17a2b8; color: #b8d4e3; }
+
+/* ========== LIST-GROUP Y TIMELINE ========== */
+body.dark-mode .list-group-item {
+    background-color: #3a4047;
+    border-color: #495057;
+    color: #dee2e6;
+}
+body.dark-mode .list-group-item.active { background-color: #007bff; border-color: #007bff; color: #fff; }
+body.dark-mode .list-group-item-action:hover { background-color: #43494e; color: #fff; }
+body.dark-mode .timeline-item { background-color: #3a4047; color: #dee2e6; border-color: #495057; }
+body.dark-mode .timeline-header { border-bottom-color: #495057; color: #ced4da; }
+body.dark-mode .timeline-body { background-color: rgba(0,0,0,0.15); border-color: #495057; color: #dee2e6; }
+body.dark-mode .timeline .time { color: #adb5bd; }
+
+/* ========== BADGES (contraste estándar para legibilidad) ========== */
+.badge-primary { background-color: #007bff; color: #fff; }
+.badge-success { background-color: #28a745; color: #fff; }
+.badge-warning { background-color: #ffc107; color: #212529; }
+.badge-danger { background-color: #dc3545; color: #fff; }
+.badge-info { background-color: #17a2b8; color: #fff; }
+.badge-secondary { background-color: #6c757d; color: #fff; }
+.badge-light { background-color: #e9ecef; color: #212529; border: 1px solid #dee2e6; }
+.badge-dark { background-color: #343a40; color: #fff; }
+body.dark-mode .badge-primary { background-color: #0069d9; color: #fff; }
+body.dark-mode .badge-success { background-color: #218838; color: #fff; }
+body.dark-mode .badge-warning { background-color: #e0a800; color: #212529; }
+body.dark-mode .badge-danger { background-color: #c82333; color: #fff; }
+body.dark-mode .badge-info { background-color: #138496; color: #fff; }
+body.dark-mode .badge-secondary { background-color: #5a6268; color: #fff; }
+body.dark-mode .badge-light { background-color: #495057; color: #e9ecef; }
+body.dark-mode .badge-dark { background-color: #23272b; color: #fff; }
+
+/* ========== PAGINACIÓN ========== */
+body.dark-mode .pagination .page-link {
+    background-color: #3a4047 !important;
+    border-color: #495057 !important;
+    color: #e9ecef !important;
+}
+body.dark-mode .pagination .page-link:hover {
+    background-color: #495057 !important;
+    color: #fff !important;
+}
+body.dark-mode .pagination .page-item.active .page-link {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+    color: #fff !important;
+}
+body.dark-mode .pagination .page-item.disabled .page-link {
+    background-color: #343a40 !important;
+    color: #6c757d !important;
+}
+
+/* ========== TEXTO MUTED Y ENLACES ========== */
+body.dark-mode .text-muted { color: #adb5bd !important; }
+body.dark-mode a:not(.btn):not(.nav-link):not(.dropdown-item) { color: #6ea8fe; }
+body.dark-mode a:not(.btn):not(.nav-link):not(.dropdown-item):hover { color: #8fc1ff; }
+body.dark-mode .text-dark { color: #e9ecef !important; }
+
+/* ========== INVENTARIO: FILA SUSPENDIDA ========== */
+.bg-suspended { background-color: #fff5f5; color: #dc3545; }
+body.dark-mode .bg-suspended { background-color: #3d2525; color: #ff6b6b; }
+
+/* ========== PÁGINA 403 / ERROR ========== */
+.page-about { padding: 2rem 0; }
+body.dark-mode .page-about h1 { color: #e9ecef; }
+body.dark-mode .page-about p { color: #adb5bd; }
+body.dark-mode .page-about a { color: #6ea8fe; }
+
+/* ========== TABLAS: badges en celdas (evita solape con columnas vecinas en tablas anchas / layout fijo) ========== */
+.table td .badge,
+.table th .badge {
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.25;
+    vertical-align: middle;
+    box-sizing: border-box;
+    text-align: center;
+}
+.table td .badge {
+    display: inline-block;
+}

@@ -1,0 +1,52 @@
+/* Roboto se carga en las vistas de acceso (login, recuperar, etc.) */
+:root {
+    --font-family-sans-serif: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+body.hold-transition.login-page,
+body.login-page {
+    font-family: var(--font-family-sans-serif);
+    line-height: 1.5;
+}
+
+/* Márgenes seguros en pantallas con notch */
+.login-page .login-box {
+    padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+}
+
+.login {
+    -ms-flex-align: center;
+    align-items: center;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    height: 100vh;
+    -ms-flex-pack: center;
+    justify-content: center;
+}
+
+.bg-dark {
+  background-color: #000!important;
+  opacity: .92;
+}
+
+.img-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.input-group-text {
+  background-color: #000;
+}
+
+.form-control {
+  background-color: #000;
+  color: #fff;
+}
+
+.form-control:focus {
+  background-color: #000!important;
+  color: #fff;
+}

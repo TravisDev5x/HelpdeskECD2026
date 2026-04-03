@@ -1,0 +1,118 @@
+/**
+ * Navegación por teclado y contraste de foco en toda la aplicación (Admin + login).
+ * Usa :focus-visible para no anular el feedback del ratón donde el navegador lo permite.
+ */
+
+/* Saltar al contenido (visible solo al enfocar con Tab) */
+.skip-to-content {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 100000;
+    padding: 0.65rem 1.1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    border-radius: 0 0 0.25rem 0.25rem;
+    background: #007bff;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.skip-to-content:focus {
+    left: 0.5rem;
+    top: 0.5rem;
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+}
+body.dark-mode .skip-to-content {
+    background: #0d6efd;
+    color: #fff !important;
+}
+
+/* Ancla principal al saltar desde el enlace */
+#main-content:focus {
+    outline: none;
+}
+
+/* Anillos de foco por teclado: enlaces, botones, formularios, menú */
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+.nav-link:focus-visible,
+.page-link:focus-visible,
+.dropdown-item:focus-visible,
+.form-control:focus-visible,
+.custom-select:focus-visible,
+.custom-control-input:focus-visible + .custom-control-label,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[role="tab"]:focus-visible,
+.treeview-menu .nav-link:focus-visible {
+    outline: 3px solid #0d6efd;
+    outline-offset: 2px;
+}
+
+/* Controles compactos (herramientas de card, iconos en barra) */
+.btn-tool:focus-visible,
+.close:focus-visible {
+    outline: 3px solid #0d6efd;
+    outline-offset: 2px;
+}
+
+body.dark-mode a:focus-visible,
+body.dark-mode button:focus-visible,
+body.dark-mode .btn:focus-visible,
+body.dark-mode .nav-link:focus-visible,
+body.dark-mode .page-link:focus-visible,
+body.dark-mode .dropdown-item:focus-visible,
+body.dark-mode .form-control:focus-visible,
+body.dark-mode .custom-select:focus-visible,
+body.dark-mode input:focus-visible,
+body.dark-mode select:focus-visible,
+body.dark-mode textarea:focus-visible,
+body.dark-mode .btn-tool:focus-visible,
+body.dark-mode .close:focus-visible {
+    outline-color: #6ea8fe;
+}
+
+/* Paginación Bootstrap 4: foco más claro que solo borde */
+.page-link:focus-visible {
+    z-index: 2;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.35);
+}
+
+body.dark-mode .page-link:focus-visible {
+    box-shadow: 0 0 0 0.2rem rgba(110, 168, 254, 0.45);
+}
+
+/* Tablas: celdas con controles no “pierden” el foco visual */
+.table .btn:focus-visible,
+.table a:focus-visible {
+    position: relative;
+    z-index: 1;
+}
+
+/* Barra superior: área mínima cómoda para clic/teclado sin afectar el sidebar */
+.main-header.navbar .navbar-nav > .nav-item > .nav-link {
+    min-height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Desplazamiento suave solo si el usuario no pide menos movimiento */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+}
