@@ -9,7 +9,7 @@
     $isCatalogActive = request()->routeIs([
         'admin.companies*', 'admin.sedes*', 'admin.ubicaciones*', 'admin.departments*',
         'admin.positions*', 'admin.failures*', 'admin.campaigns*', 'did*',
-        'admin.contenido.ctg.*'
+        'admin.contenido.ctg.*', 'admin.areas*',
     ]);
 
     $canAccessCatalogs = $user && (
@@ -18,7 +18,7 @@
         $user->can('modulo.sedes') || $user->can('modulo.ubicaciones') ||
         $user->can('read departments') || $user->can('read positions') ||
         $user->can('read failures') || $user->can('read campaigns') ||
-        $user->can('modulo.did')
+        $user->can('modulo.did') || $user->can('read areas')
     );
 
     // -- Validaciones para el bloque CONFIGURACIÓN --
@@ -338,16 +338,6 @@
             </li>
         @endcan
 
-        {{-- AREAS --}}
-        @can('read areas')
-            <li class="nav-item">
-                <a href="{{ route('admin.areas.index') }}" class="nav-link {{ request()->routeIs('admin.areas*') ? 'active' : '' }}">
-                    <i class="fas fa-map-marked-alt nav-icon text-secondary"></i>
-                    <p>Areas</p>
-                </a>
-            </li>
-        @endcan
-
         {{-- INCIDENCIAS --}}
         @can('read incidents')
             <li class="nav-item has-treeview {{ request()->is('admin/incidents*', 'admin/contenido/ctg*', 'admin/ciberseguridad*') ? 'menu-open' : '' }}">
@@ -455,6 +445,13 @@
                         <li class="nav-item">
                             <a href="{{ route('admin.positions.index') }}" class="nav-link {{ request()->routeIs('admin.positions*') ? 'active' : '' }}">
                                 <i class="fas fa-id-badge nav-icon text-secondary"></i><p>Puestos</p>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('read areas')
+                        <li class="nav-item">
+                            <a href="{{ route('admin.areas.index') }}" class="nav-link {{ request()->routeIs('admin.areas*') ? 'active' : '' }}">
+                                <i class="fas fa-map-marked-alt nav-icon text-secondary"></i><p>Áreas</p>
                             </a>
                         </li>
                     @endcan
