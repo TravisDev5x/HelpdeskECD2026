@@ -10,9 +10,11 @@ use App\Models\InvStatus;
 use App\Models\Sede;
 use App\Models\User;
 use App\Support\InventoryV2FilterPermissions;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Excel as ExcelWriterType;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 
 class InventoryExportController extends Controller
 {
@@ -65,19 +67,33 @@ class InventoryExportController extends Controller
             : 'Todos';
         $labelFilterLabel = $labelFilter === 'missing' ? 'Sin etiqueta de sede' : ($labelFilter === 'with' ? 'Con etiqueta de sede' : 'Todas');
 
-        return Excel::download(
-            new InventoryWorkbookExport($collection, [
-                'search' => $search ?: '',
-                'category_label' => $categoryLabel,
-                'status_label' => $statusLabel,
-                'sede_label' => $sedeLabel,
-                'assignee_label' => $assigneeLabel,
-                'label_filter_label' => $labelFilterLabel,
-                'date_field' => $dateField,
-                'date_from' => $dateFrom,
-                'date_to' => $dateTo,
-            ]),
-            'inventario_v2_' . date('Y-m-d_His') . '.xlsx'
-        );
+        $export = new InventoryWorkbookExport($collection, [
+            'search' => $search ?: '',
+            'category_label' => $categoryLabel,
+            'status_label' => $statusLabel,
+            'sede_label' => $sedeLabel,
+            'assignee_label' => $assigneeLabel,
+            'label_filter_label' => $labelFilterLabel,
+            'date_field' => $dateField,
+            'date_from' => $dateFrom,
+            'date_to' => $dateTo,
+        ]);
+
+        $filename = 'inventario_v2_' . date('Y-m-d_His') . '.xlsx';
+
+        // En Windows, Excel::download() + archivo temporal + deleteFileAfterSend suele provocar
+        // "archivo en uso" / bloqueo al leer o borrar el .xlsx. raw() cierra el temporal antes de responder.
+        $binary = Excel::raw($export, ExcelWriterType::XLSX);
+
+        return response($binary, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => HeaderUtils::makeDisposition(
+                HeaderUtils::DISPOSITION_ATTACHMENT,
+                $filename,
+                preg_replace('/[^\x20-\x7E]/', '_', $filename)
+            ),
+            'Cache-Control' => 'max-age=0, must-revalidate',
+            'Pragma' => 'public',
+        ]);
     }
 }
