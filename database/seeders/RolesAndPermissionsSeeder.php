@@ -116,6 +116,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'receive internal notification user login',
             'receive internal notification password support',
             'receive internal notification user missing email',
+            'receive internal notification ticket assigned',
+            'receive internal notification ticket resolved',
+            'receive internal notification ticket closed',
+            'receive internal notification password expiring soon',
+            'receive internal notification info',
         ] as $internalNotifPerm) {
             Permission::firstOrCreate(
                 ['name' => $internalNotifPerm, 'guard_name' => config('auth.defaults.guard', 'web')]
@@ -277,6 +282,31 @@ class RolesAndPermissionsSeeder extends Seeder
         $role = Role::create(['name' => 'Auditor']);
         $role->givePermissionTo('read products');
         $role->givePermissionTo('update products');
+
+        $guard = config('auth.defaults.guard', 'web');
+        $pwdSoonPerm = Permission::where('name', 'receive internal notification password expiring soon')->where('guard_name', $guard)->first();
+        $assignedPerm = Permission::where('name', 'receive internal notification ticket assigned')->where('guard_name', $guard)->first();
+        $resolvedPerm = Permission::where('name', 'receive internal notification ticket resolved')->where('guard_name', $guard)->first();
+        $closedPerm = Permission::where('name', 'receive internal notification ticket closed')->where('guard_name', $guard)->first();
+        foreach (Role::query()->cursor() as $roleModel) {
+            if ($roleModel->name === 'Admin' || $roleModel->name === 'Suspendido') {
+                continue;
+            }
+            if ($pwdSoonPerm && ! $roleModel->hasPermissionTo($pwdSoonPerm)) {
+                $roleModel->givePermissionTo($pwdSoonPerm);
+            }
+            if ($assignedPerm && $roleModel->hasPermissionTo('update service') && ! $roleModel->hasPermissionTo($assignedPerm)) {
+                $roleModel->givePermissionTo($assignedPerm);
+            }
+            if ($roleModel->hasPermissionTo('create service') || $roleModel->hasPermissionTo('read services')) {
+                if ($resolvedPerm && ! $roleModel->hasPermissionTo($resolvedPerm)) {
+                    $roleModel->givePermissionTo($resolvedPerm);
+                }
+                if ($closedPerm && ! $roleModel->hasPermissionTo($closedPerm)) {
+                    $roleModel->givePermissionTo($closedPerm);
+                }
+            }
+        }
 
         $panelNotifications = Permission::firstOrCreate(
             ['name' => 'read panel notifications', 'guard_name' => 'web']

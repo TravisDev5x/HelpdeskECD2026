@@ -41,13 +41,15 @@ class NotifyPasswordExpiryCommand extends Command
                 $message = 'Tu contraseña caduca el '.$expires->format('d/m/Y').'. '
                     .'Cámbiala desde tu perfil para mantener el acceso.';
 
-                $user->notify(new InternalUserNotification(
-                    $title,
-                    $message,
-                    route('profile'),
-                    'password_expiring_soon'
-                ));
-                $count++;
+                if ($user->can('receive internal notification password expiring soon')) {
+                    $user->notify(new InternalUserNotification(
+                        $title,
+                        $message,
+                        route('profile'),
+                        'password_expiring_soon'
+                    ));
+                    $count++;
+                }
             }
         });
 

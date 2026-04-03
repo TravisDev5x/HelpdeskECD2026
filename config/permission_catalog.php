@@ -28,6 +28,8 @@ return [
         ['group' => 'inventario_v2', 'pattern' => '/^(read|edit|manage|use) inventory\b/'],
         ['group' => 'asignaciones', 'pattern' => '/assignment/'],
         ['group' => 'inventario_v1', 'pattern' => '/product/'],
+        // Antes que «usuarios» (\buser), para no agrupar receive internal notification user * en Usuarios.
+        ['group' => 'notificaciones', 'pattern' => '/^receive internal notification\b/'],
         ['group' => 'usuarios', 'pattern' => '/\buser/'],
         ['group' => 'organizacion', 'pattern' => '/\b(department|position|area|failure)/'],
         ['group' => 'servicios', 'pattern' => '/\bservice/'],
@@ -35,7 +37,6 @@ return [
         ['group' => 'bitacora', 'pattern' => '/bitacora/'],
         ['group' => 'activos_certificacion', 'pattern' => '/\b(asset|test|incident|certification)/'],
         ['group' => 'modulos', 'pattern' => '/^(modulo\.|read calendar)/'],
-        ['group' => 'notificaciones', 'pattern' => '/^receive internal notification\b/'],
         ['group' => 'otros', 'pattern' => '/.*/'],
     ],
 
@@ -141,8 +142,8 @@ return [
             'description' => 'Recibe en la campana el aviso cuando se crea un ticket (y el correo paralelo si tiene email). Quien no lo tenga no entra en la lista de destinatarios.',
         ],
         'receive internal notification user login' => [
-            'label' => 'Notif. interna: inicio de sesión de usuarios',
-            'description' => 'Recibe avisos cuando otro usuario inicia sesión (auditoría). No se notifica a uno mismo.',
+            'label' => 'Notif. interna: inicio de sesión',
+            'description' => 'Recibe en la campana el aviso cuando otro usuario inicia sesión (auditoría). No se notifica a uno mismo.',
         ],
         'receive internal notification password support' => [
             'label' => 'Notif. interna: solicitud ayuda acceso / contraseña',
@@ -151,6 +152,26 @@ return [
         'receive internal notification user missing email' => [
             'label' => 'Notif. interna: usuario sin correo',
             'description' => 'Recibe aviso cuando un usuario entra o restablece sesión sin email en su perfil (regularizar cuenta).',
+        ],
+        'receive internal notification ticket assigned' => [
+            'label' => 'Notif. interna: ticket asignado a mí',
+            'description' => 'Recibe aviso en la campana cuando te asignan como responsable de un ticket.',
+        ],
+        'receive internal notification ticket resolved' => [
+            'label' => 'Notif. interna: mi ticket resuelto',
+            'description' => 'Recibe aviso cuando un ticket tuyo pasa a resuelto (finalizado).',
+        ],
+        'receive internal notification ticket closed' => [
+            'label' => 'Notif. interna: mi ticket cerrado (otro estatus)',
+            'description' => 'Recibe aviso cuando un ticket tuyo se cierra con un estatus distinto de resuelto.',
+        ],
+        'receive internal notification password expiring soon' => [
+            'label' => 'Notif. interna: contraseña por vencer',
+            'description' => 'Recibe el aviso del panel (y comando helpdesk:notify-password-expiry) cuando tu contraseña está próxima a caducar.',
+        ],
+        'receive internal notification info' => [
+            'label' => 'Notif. interna: genéricas (tipo info)',
+            'description' => 'Notificaciones internas con tipo genérico «info» (reservado para extensiones). Por defecto suele asignarse solo a administración.',
         ],
     ],
 ];

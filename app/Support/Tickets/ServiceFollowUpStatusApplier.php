@@ -79,7 +79,7 @@ final class ServiceFollowUpStatusApplier
 
         if ($newResponsableId && $newResponsableId !== (int) $oldResponsableId) {
             $assignee = User::find($newResponsableId);
-            if ($assignee) {
+            if ($assignee && $assignee->can('receive internal notification ticket assigned')) {
                 $failureLabel = $failure?->name ?? '—';
                 try {
                     $assignee->notify(new InternalUserNotification(
@@ -103,13 +103,15 @@ final class ServiceFollowUpStatusApplier
         if ($isClosingStatus) {
             if ($user && ! $wasClosedBefore) {
                 if ($status === TicketStatus::FINALIZADO) {
-                    $user->notify(new InternalUserNotification(
-                        'Ticket #'.$serviceAux->id.' resuelto',
-                        'Tu ticket fue marcado como resuelto. Puedes revisar el detalle en inicio.',
-                        route('home').'?id='.$serviceAux->id,
-                        'ticket_resolved'
-                    ));
-                } else {
+                    if ($user->can('receive internal notification ticket resolved')) {
+                        $user->notify(new InternalUserNotification(
+                            'Ticket #'.$serviceAux->id.' resuelto',
+                            'Tu ticket fue marcado como resuelto. Puedes revisar el detalle en inicio.',
+                            route('home').'?id='.$serviceAux->id,
+                            'ticket_resolved'
+                        ));
+                    }
+                } elseif ($user->can('receive internal notification ticket closed')) {
                     $user->notify(new InternalUserNotification(
                         'Ticket #'.$serviceAux->id.' cerrado',
                         'Tu ticket fue cerrado con estatus: '.$status.'.',

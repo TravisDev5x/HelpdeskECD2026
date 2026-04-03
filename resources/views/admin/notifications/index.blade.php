@@ -15,9 +15,15 @@
                         @can('receive internal notification ticket created')
                         <option value="ticket_created" @selected(($type ?? '') === 'ticket_created')>Ticket creado</option>
                         @endcan
+                        @can('receive internal notification ticket assigned')
                         <option value="ticket_assigned" @selected(($type ?? '') === 'ticket_assigned')>Ticket asignado</option>
+                        @endcan
+                        @can('receive internal notification ticket resolved')
                         <option value="ticket_resolved" @selected(($type ?? '') === 'ticket_resolved')>Ticket resuelto</option>
+                        @endcan
+                        @can('receive internal notification ticket closed')
                         <option value="ticket_closed" @selected(($type ?? '') === 'ticket_closed')>Ticket cerrado (otro)</option>
+                        @endcan
                         @can('receive internal notification user login')
                         <option value="user_login" @selected(($type ?? '') === 'user_login')>Inicio de sesión</option>
                         @endcan
@@ -27,7 +33,12 @@
                         @can('receive internal notification user missing email')
                         <option value="user_missing_email" @selected(($type ?? '') === 'user_missing_email')>Usuario sin correo</option>
                         @endcan
+                        @can('receive internal notification password expiring soon')
                         <option value="password_expiring_soon" @selected(($type ?? '') === 'password_expiring_soon')>Contraseña por vencer</option>
+                        @endcan
+                        @can('receive internal notification info')
+                        <option value="info" @selected(($type ?? '') === 'info')>Genérico (info)</option>
+                        @endcan
                     </select>
                 </form>
                 <form action="{{ route('admin.notifications.read-all') }}" method="POST" class="d-inline">

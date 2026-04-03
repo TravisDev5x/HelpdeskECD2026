@@ -34,9 +34,14 @@ final class InternalNotificationTypeRegistry
      */
     public const TYPE_RECEIVE_PERMISSION = [
         'ticket_created' => 'receive internal notification ticket created',
+        'ticket_assigned' => 'receive internal notification ticket assigned',
+        'ticket_resolved' => 'receive internal notification ticket resolved',
+        'ticket_closed' => 'receive internal notification ticket closed',
         'user_login' => 'receive internal notification user login',
         'password_support_request' => 'receive internal notification password support',
         'user_missing_email' => 'receive internal notification user missing email',
+        'password_expiring_soon' => 'receive internal notification password expiring soon',
+        'info' => 'receive internal notification info',
     ];
 
     public static function normalizedFilter(?string $type): ?string
