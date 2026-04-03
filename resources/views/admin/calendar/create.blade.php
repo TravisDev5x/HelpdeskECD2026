@@ -12,6 +12,17 @@
         </div>
         <div class="modal-body">
           <div class="form-row">
+            @if($canManageTeamCalendar ?? false)
+            <div class="form-group col-md-12">
+              <label for="scope">Ámbito</label>
+              <select id="scope" name="scope" class="custom-select" required>
+                <option value="personal">Personal (solo usted)</option>
+                <option value="team">Equipo (visible para quien tenga permiso de ver calendario de equipo)</option>
+              </select>
+            </div>
+            @else
+            <input type="hidden" name="scope" value="personal">
+            @endif
             <div class="col-md-12">
               <label>Fecha de inicio:</label> <span id="date"></span><br>
               <label for="time">Fehca de fin</label>

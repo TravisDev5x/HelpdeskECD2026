@@ -36,7 +36,7 @@ return [
         ['group' => 'empresas_catalogos', 'pattern' => '/\b(company|campaign)/'],
         ['group' => 'bitacora', 'pattern' => '/bitacora/'],
         ['group' => 'activos_certificacion', 'pattern' => '/\b(asset|test|incident|certification)/'],
-        ['group' => 'modulos', 'pattern' => '/^(modulo\.|read calendar)/'],
+        ['group' => 'modulos', 'pattern' => '/^(modulo\.|read calendar|read team calendar|manage team calendar)/'],
         ['group' => 'otros', 'pattern' => '/.*/'],
     ],
 
@@ -136,6 +136,18 @@ return [
         'read reports inventory' => [
             'label' => 'Reportes: detalle inventario (clásico)',
             'description' => 'Reportes de inventario del módulo administrativo; distinto del inventario V2 Livewire.',
+        ],
+        'read calendar' => [
+            'label' => 'Agenda: acceder al calendario',
+            'description' => 'Abre el módulo de agenda y gestiona el calendario personal (sus propios eventos).',
+        ],
+        'read team calendar' => [
+            'label' => 'Agenda: ver calendario de equipo',
+            'description' => 'Ve en la misma vista los eventos marcados como de equipo (compartidos), además de los personales.',
+        ],
+        'manage team calendar' => [
+            'label' => 'Agenda: gestionar eventos de equipo',
+            'description' => 'Crear y editar eventos de equipo visibles para quien tenga «ver calendario de equipo». Sin este permiso solo puede gestionar sus eventos personales.',
         ],
         'receive internal notification ticket created' => [
             'label' => 'Notif. interna: nuevo ticket',

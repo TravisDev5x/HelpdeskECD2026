@@ -20,6 +20,15 @@
 
 @section('content')
   {{-- FullCalendar antes cargaba desde adminlte/plugins/fullcalendar (no existe en public); CDN 5.x compatible con el script actual --}}
+  <p class="text-muted small mb-2">
+    <span class="d-inline-block mr-3"><span class="badge align-middle" style="background:#3788d8">&nbsp;</span> Personal (solo usted)</span>
+    @if($canReadTeamCalendar)
+      <span class="d-inline-block"><span class="badge align-middle" style="background:#6f42c1">&nbsp;</span> Equipo (visible según permisos de rol)</span>
+    @endif
+  </p>
+  @if(!$canReadTeamCalendar)
+    <p class="alert alert-light border small mb-2">No tiene permiso para ver el calendario de equipo; solo verá sus eventos personales.</p>
+  @endif
   <div id="calendar" class="mb-3"></div>
   @include('admin.calendar.create')
   @include('admin.calendar.update')
@@ -81,6 +90,19 @@
               $('#status_update').val(datos.status);
               $('#date_update').html(datos.start_date);
               $('#date_post_update').val(datos.start_date);
+              var canEdit = datos.can_edit !== false && datos.can_edit !== 0;
+              if (canEdit) {
+                $('#actividad_update, #descripcion_update').prop('readonly', false);
+                $('#date_end_update, #time_update').prop('readonly', false);
+                $('#status_update').prop('disabled', false);
+                $('#modalEvent .modal-title').text('Seguimiento');
+              } else {
+                $('#actividad_update, #descripcion_update').prop('readonly', true);
+                $('#date_end_update, #time_update').prop('readonly', true);
+                $('#status_update').prop('disabled', true);
+                $('#modalEvent .modal-title').text('Evento (solo lectura)');
+              }
+              $('#modalEvent').find('button[type="submit"]').prop('disabled', !canEdit).toggle(canEdit);
               $('#modalEvent').modal('show');
             });
             info.el.style.borderColor = 'red';
@@ -99,6 +121,13 @@
       .fail(function(xhr) {
         calendarEl.innerHTML = '<div class="alert alert-danger">No se pudieron cargar los eventos (' + (xhr.status || 'error') + ').</div>';
       });
+    $('#modalEvent').on('hidden.bs.modal', function() {
+      $('#actividad_update, #descripcion_update').prop('readonly', false);
+      $('#date_end_update, #time_update').prop('readonly', false);
+      $('#status_update').prop('disabled', false);
+      $('#modalEvent').find('button[type="submit"]').prop('disabled', false).show();
+      $('#modalEvent .modal-title').text('Seguimiento');
+    });
   });
 </script>
 @endpush

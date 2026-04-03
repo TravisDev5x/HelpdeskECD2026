@@ -6,14 +6,14 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Reduce crecimiento de la tabla notifications (solo lecturas ya marcadas como leídas).
+ * Reduce crecimiento de la tabla notifications (leídas y no leídas por el mismo umbral de antigüedad).
  */
 class PruneNotificationsCommand extends Command
 {
     protected $signature = 'helpdesk:prune-notifications
-                            {--days=90 : Eliminar notificaciones leídas más antiguas que estos días}';
+                            {--days=90 : Antigüedad máxima en días (leídas por read_at; no leídas por created_at)}';
 
-    protected $description = 'Elimina notificaciones de panel marcadas como leídas y más antiguas que el umbral.';
+    protected $description = 'Elimina notificaciones de panel más antiguas que el umbral (leídas según read_at; no leídas según created_at).';
 
     public function handle(): int
     {
@@ -27,11 +27,16 @@ class PruneNotificationsCommand extends Command
         }
 
         $deleted = DB::table('notifications')
-            ->whereNotNull('read_at')
-            ->where('read_at', '<', $cutoff)
+            ->where(function ($query) use ($cutoff) {
+                $query->where(function ($q) use ($cutoff) {
+                    $q->whereNotNull('read_at')->where('read_at', '<', $cutoff);
+                })->orWhere(function ($q) use ($cutoff) {
+                    $q->whereNull('read_at')->where('created_at', '<', $cutoff);
+                });
+            })
             ->delete();
 
-        $this->info("Eliminadas {$deleted} notificación(es) leídas anteriores a {$cutoff->toDateTimeString()}.");
+        $this->info("Eliminadas {$deleted} notificación(es) anteriores a {$cutoff->toDateTimeString()} (leídas por read_at; no leídas por created_at).");
 
         return self::SUCCESS;
     }

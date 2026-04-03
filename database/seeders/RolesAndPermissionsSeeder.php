@@ -110,6 +110,12 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'modulo.did']);
         Permission::create(['name' => 'modulo.ubicaciones']);
         Permission::create(['name' => 'read calendar']);
+        Permission::firstOrCreate(
+            ['name' => 'read team calendar', 'guard_name' => config('auth.defaults.guard', 'web')]
+        );
+        Permission::firstOrCreate(
+            ['name' => 'manage team calendar', 'guard_name' => config('auth.defaults.guard', 'web')]
+        );
 
         foreach ([
             'receive internal notification ticket created',
