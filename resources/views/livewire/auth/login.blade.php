@@ -1,41 +1,4 @@
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <link rel="icon" type="ico" href="{{ asset('favicon.ico') }}" />
-  <title>{{ config('app.name') }} | Log in</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
-  <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
-  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-  <link rel="stylesheet" href="{{ asset('adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
-  <link rel="stylesheet" href="{{ asset('adminlte/css/adminlte.min.css') }}">
-
-  <link href="{{ asset('css/background.css') }}" rel="stylesheet">
-  <link href="{{ asset('css/login.css') }}" rel="stylesheet">
-  <link href="{{ asset('css/accessibility.css') }}" rel="stylesheet">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
-
-  @livewireStyles
-
-  <style>
-
-    body {
-        background-repeat: no-repeat !important;
-        background-attachment: fixed !important;
-        background-position: center center !important;
-        background-size: cover !important;
-    }
-    .cursor-pointer { cursor: pointer; }
-  </style>
-</head>
-
-<body class="hold-transition login-page">
-  {{-- Un solo hijo elemento en <body> (excl. script): Livewire en debug cuenta raíces; skip + caja eran 2. --}}
-  <div class="lw-auth-page-root">
+<div class="lw-auth-page-root">
   <a href="#main-content" class="skip-to-content">Ir al formulario de acceso</a>
   <div class="login-box" id="main-content" tabindex="-1">
 
@@ -49,13 +12,13 @@
             {{ session('error') }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
-          @endif
-          @if (session('message'))
+        @endif
+        @if (session('message'))
           <div class="alert alert-success alert-dismissible small mb-3">
             {{ session('message') }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
-          @endif
+        @endif
         <form id="loginForm" wire:submit="authenticate">
           <div class="input-group mb-3">
             <input id="usuario" type="text" placeholder="Usuario o correo" class="form-control @error('usuario') is-invalid @enderror" name="usuario" wire:model="usuario" required autocomplete="username" autofocus>
@@ -104,30 +67,23 @@
       </div>
     </div>
   </div>
-  </div>
+</div>
 
-  <script src="{{ asset('adminlte/plugins/jquery/jquery.min.js') }}"></script>
-  <script src="{{ asset('adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-  <script src="{{ asset('adminlte/js/adminlte.min.js') }}"></script>
-
-  <script>
-
-      function togglePassword() {
-          var input = document.getElementById("password");
-          var icon = document.getElementById("toggleIcon");
-
-          if (input.type === "password") {
-              input.type = "text";
-              icon.classList.remove("fa-eye");
-              icon.classList.add("fa-eye-slash");
-          } else {
-              input.type = "password";
-              icon.classList.remove("fa-eye-slash");
-              icon.classList.add("fa-eye");
-          }
-      }
-  </script>
-
-  @livewireScripts
-</body>
-</html>
+@push('guest-scripts')
+<script>
+  function togglePassword() {
+    var input = document.getElementById('password');
+    var icon = document.getElementById('toggleIcon');
+    if (!input || !icon) return;
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  }
+</script>
+@endpush

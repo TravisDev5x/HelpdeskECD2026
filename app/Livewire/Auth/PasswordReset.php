@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Notification;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.livewire-bare')]
+#[Layout('layouts.guest-auth')]
 class PasswordReset extends Component
 {
     public string $token = '';

@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.livewire-bare')]
+#[Layout('layouts.guest-auth')]
 class PasswordRequest extends Component
 {
     public string $email = '';

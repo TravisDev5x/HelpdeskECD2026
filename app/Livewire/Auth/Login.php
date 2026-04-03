@@ -16,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.livewire-bare')]
+#[Layout('layouts.guest-auth')]
 class Login extends Component
 {
     public string $usuario = '';
