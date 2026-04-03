@@ -9,7 +9,6 @@ use App\Http\Controllers\Admin\BitacoraController;
 use App\Http\Controllers\Admin\BitacoraHostController;
 use App\Http\Controllers\Admin\CalendarController;
 use App\Http\Controllers\Admin\CampaignsController;
-use App\Http\Controllers\Admin\ChatController;
 use App\Http\Controllers\Admin\CompaniesController;
 use App\Http\Controllers\Admin\ComponentsController;
 use App\Http\Controllers\Admin\ContenidoCtgsController;
@@ -110,8 +109,6 @@ Route::prefix('admin')
         // --- Dashboard y Herramientas Generales ---
         Route::get('/', [AdminController::class, 'index'])->name('admin')->middleware('permission:read services');
         Route::get('/indicadores', [AdminController::class, 'indicadores_solos'])->middleware('permission:read services');
-        Route::get('chat', [ChatController::class, 'index'])->name('admin.chat.index')->middleware('role:Admin|Soporte');
-
         // Agenda / Calendario
         Route::get('calendar', [CalendarController::class, 'index'])->name('admin.agenda.index')->middleware('permission:read calendar');
         Route::post('calendar/store', [CalendarController::class, 'store'])->name('admin.agenda.store')->middleware('permission:read calendar');

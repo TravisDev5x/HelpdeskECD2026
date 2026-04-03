@@ -57,7 +57,7 @@ class BitacoraHostController extends Controller
             $bitacoraHost = BitacoraHost::select('bitacora_hosts.*', 'users.name')
                 ->leftJoin('users', 'bitacora_hosts.user_id', '=', 'users.id')
                 // ->whereBetween('bitacora_hosts.fecha',[$fecha_i,$fecha_f])
-                ->where('bitacoras.user_id', auth()->id())
+                ->where('bitacora_hosts.user_id', auth()->id())
                 ->get();
         }
 

@@ -26,7 +26,7 @@
         'admin.companies*', 'admin.sedes*', 'admin.ubicaciones*', 'admin.departments*',
         'admin.positions*', 'admin.failures*', 'admin.campaigns*', 'did*',
         'admin.assets*', 'admin.tests*', 'admin.nivel', 'admin.permissions*',
-        'admin.roles*', 'admin.bitacora*', 'admin.bitacoraHost*', 'admin.agenda*', 'admin.chat*'
+        'admin.roles*', 'admin.bitacora*', 'admin.bitacoraHost*', 'admin.agenda*'
     ]);
 
     $canAccessConfig = $user && (
@@ -568,11 +568,6 @@
                                 </a>
                             </li>
                         @endcan
-                        <li class="nav-item">
-                            <a href="{{ route('admin.chat.index') }}" class="nav-link {{ request()->routeIs('admin.chat.index') ? 'active' : '' }}">
-                                <i class="fas fa-comments nav-icon text-secondary"></i><p>Chat</p>
-                            </a>
-                        </li>
                     @endrole
                 </ul>
             </li>

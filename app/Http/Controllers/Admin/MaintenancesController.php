@@ -22,11 +22,6 @@ class MaintenancesController extends Controller
     return view('admin.maintenances.index', compact('maintenances'));
   }
 
-  public function create()
-  {
-    //
-  }
-
   public function show(Request $request, $id)
   {
     $product = Product::whereId($id)->first();
@@ -74,11 +69,6 @@ class MaintenancesController extends Controller
       $maintenance = Maintenance::create($data);
   
       return back()->with('flash', 'Mantenimiento guardado');
-  }
-
-  public function destroy($id)
-  {
-    //
   }
 
   public function get_mantenances()
