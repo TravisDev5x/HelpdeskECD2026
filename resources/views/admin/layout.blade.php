@@ -435,7 +435,7 @@
 
         {{-- SIDEBAR --}}
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
-            <a href="{{ route('home') }}" class="brand-link">
+            <a href="{{ auth()->user()->can('read services') ? route('home') : route('profile') }}" class="brand-link">
                 <img id="img-logo-nav" src="{{ asset('adminlte/img/logo.png') }}" alt="Logo" class="brand-image">
                 <span class="brand-text">HelpDesk <b>ECD</b></span>
             </a>
@@ -481,9 +481,9 @@
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     </div>
                 @endif
-                @if($errors->any())
+                @if(isset($errors) && $errors->any())
                     <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert">
-                        <i class="fas fa-exclamation-circle mr-2"></i> {{$errors->first()}}
+                        <i class="fas fa-exclamation-circle mr-2"></i> {{ $errors->first() }}
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     </div>
                 @endif

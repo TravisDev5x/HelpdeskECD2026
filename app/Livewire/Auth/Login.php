@@ -4,7 +4,6 @@ namespace App\Livewire\Auth;
 
 use App\Models\User;
 use App\Notifications\InternalUserNotification;
-use App\Providers\RouteServiceProvider;
 use App\Support\Notifications\InternalNotificationRecipients;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Cache\RateLimiter;
@@ -32,7 +31,11 @@ class Login extends Component
     public function mount(): void
     {
         if (Auth::check()) {
-            $this->redirectIntended(RouteServiceProvider::HOME);
+            $user = Auth::user();
+            $target = $user instanceof User && $user->can('read services')
+                ? route('admin')
+                : route('profile');
+            $this->redirectIntended($target);
         }
     }
 
@@ -105,7 +108,7 @@ class Login extends Component
 
         $home = $user instanceof User && $user->can('read services')
             ? route('admin')
-            : RouteServiceProvider::HOME;
+            : route('profile');
 
         $this->redirectIntended($home);
     }
