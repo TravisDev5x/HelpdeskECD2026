@@ -7,6 +7,7 @@
         "sync-fullcalendar": "node scripts/sync-fullcalendar.mjs"
     },
     "devDependencies": {
+        "@fullcalendar/bootstrap": "^5.11.5",
         "axios": "^1.7",
         "fullcalendar": "^5.11.5",
         "laravel-vite-plugin": "^1.2",

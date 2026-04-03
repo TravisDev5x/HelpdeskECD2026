@@ -12,6 +12,7 @@ const dest = path.join(root, 'public', 'vendor', 'fullcalendar', '5.11.5');
 
 const copies = [
   ['node_modules/fullcalendar/main.min.css', 'main.min.css'],
+  ['node_modules/@fullcalendar/bootstrap/main.min.css', 'fc-bootstrap-theme.min.css'],
   ['node_modules/fullcalendar/main.min.js', 'fc-bundle.min.js'],
   ['node_modules/fullcalendar/locales-all.min.js', 'locales-all.min.js'],
 ];

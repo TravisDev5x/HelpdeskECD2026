@@ -26,14 +26,22 @@
       <span class="d-inline-block"><span class="badge align-middle" style="background:#6f42c1">&nbsp;</span> Equipo (visible según permisos de rol)</span>
     @endif
   </p>
-  <div id="calendar" class="mb-3"></div>
+  <div class="card card-primary card-outline">
+    <div class="card-body p-2 p-md-3">
+      <div id="calendar" class="fc-adminlte-wrap"></div>
+    </div>
+  </div>
   @include('admin.calendar.create')
   @include('admin.calendar.update')
 @endsection
 
 @push('styles')
   <link rel="stylesheet" href="{{ asset('vendor/fullcalendar/5.11.5/main.min.css') }}">
-  <style>#calendar { min-height: 70vh; }</style>
+  <link rel="stylesheet" href="{{ asset('vendor/fullcalendar/5.11.5/fc-bootstrap-theme.min.css') }}">
+  <style>
+    .fc-adminlte-wrap { min-height: 65vh; }
+    .fc-adminlte-wrap .fc-toolbar-title { font-size: 1.25rem; font-weight: 600; }
+  </style>
 @endpush
 
 @push('scripts')
@@ -66,6 +74,7 @@
         var calendar;
         try {
           calendar = new FullCalendar.Calendar(calendarEl, {
+          themeSystem: 'bootstrap',
           locale: 'es',
           initialView: 'dayGridMonth',
           height: 'auto',
