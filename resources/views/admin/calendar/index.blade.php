@@ -47,7 +47,8 @@
       return;
     }
     $.ajax({
-      url: @json(route('admin.agenda.get_calendar')),
+      {{-- url() evita 500 si route:cache quedó sin los nombres admin.agenda.* --}}
+      url: @json(url('admin/get_calendar')),
       type: 'GET',
     })
       .done(function(datos) {
@@ -66,7 +67,7 @@
           ],
           eventClick: function(info) {
             $.ajax({
-              url: @json(route('admin.agenda.get_event')),
+              url: @json(url('admin/get-event')),
               type: 'GET',
               dataType: 'JSON',
               data: {'id': info.event.id},
