@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Calendar;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class CalendarController extends Controller
@@ -15,10 +16,7 @@ class CalendarController extends Controller
 
     public function index()
     {
-        $ids = $this->visibleCalendarsQuery()->pluck('id');
-
         return view('admin.calendar.index', [
-            'ids' => $ids,
             'canReadTeamCalendar' => $this->userCanReadTeam(),
             'canManageTeamCalendar' => $this->userCanManageTeam(),
         ]);
@@ -85,19 +83,33 @@ class CalendarController extends Controller
     public function get_calendar()
     {
         $calendars = $this->visibleCalendarsQuery()->get();
-        $data = [];
+        $events = [];
         foreach ($calendars as $calendar) {
-            $data[$calendar->id] = [
+            $start = $calendar->start_date?->format('Y-m-d');
+            if ($start === null || $start === '') {
+                $legacyDate = $calendar->getAttribute('date');
+                if ($legacyDate !== null && $legacyDate !== '') {
+                    try {
+                        $start = Carbon::parse($legacyDate)->format('Y-m-d');
+                    } catch (\Throwable) {
+                        $start = null;
+                    }
+                }
+            }
+            if ($start === null || $start === '') {
+                continue;
+            }
+            $events[] = [
                 'id' => $calendar->id,
                 'title' => $calendar->actividad,
-                'start' => $calendar->start_date?->format('Y-m-d'),
+                'start' => $start,
                 'end' => $calendar->end_date?->format('Y-m-d'),
                 'backgroundColor' => $calendar->isTeam() ? '#6f42c1' : '#3788d8',
                 'borderColor' => $calendar->isTeam() ? '#5a32a3' : '#2c6aa0',
             ];
         }
 
-        return response()->json($data);
+        return response()->json($events);
     }
 
     public function get_event(Request $request)

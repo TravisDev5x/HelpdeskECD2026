@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@5.11.5/main.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@5.11.5/main.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@5.11.5/main.min.css">
-  <style>#calendar { min-height: 620px; }</style>
+  <style>#calendar { min-height: 70vh; }</style>
 @endpush
 
 @push('scripts')
@@ -48,31 +48,41 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
+    if (!calendarEl) {
+      return;
+    }
     if (typeof FullCalendar === 'undefined') {
       calendarEl.innerHTML = '<div class="alert alert-warning">No se pudo cargar el calendario (FullCalendar). Revisa la conexión o la consola del navegador.</div>';
       return;
     }
-    $.ajax({
+    if (typeof jQuery === 'undefined' || typeof jQuery.ajax !== 'function') {
+      calendarEl.innerHTML = '<div class="alert alert-danger">jQuery no está disponible; la agenda no puede cargar eventos.</div>';
+      return;
+    }
+    jQuery.ajax({
       {{-- url() evita 500 si route:cache quedó sin los nombres admin.agenda.* --}}
       url: @json(url('admin/get_calendar')),
       type: 'GET',
+      dataType: 'json',
     })
       .done(function(datos) {
-        var calendar = new FullCalendar.Calendar(calendarEl, {
+        var eventList = Array.isArray(datos) ? datos : [];
+        eventList = eventList.filter(function (ev) { return ev && ev.start; });
+        var calendar;
+        try {
+          calendar = new FullCalendar.Calendar(calendarEl, {
           locale: 'es',
           initialView: 'dayGridMonth',
+          height: 'auto',
+          contentHeight: 620,
           headerToolbar: {
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
           },
-          events: [
-            @foreach ($ids as $id)
-              datos[{{ $id }}],
-            @endforeach
-          ],
+          events: eventList,
           eventClick: function(info) {
-            $.ajax({
+            jQuery.ajax({
               url: @json(url('admin/get-event')),
               type: 'GET',
               dataType: 'JSON',
@@ -113,12 +123,22 @@
           },
           plugins: [ 'dayGrid', 'timeGrid', 'interaction' ],
         });
+        } catch (e) {
+          calendarEl.innerHTML = '<div class="alert alert-danger">Error al inicializar el calendario. Si el problema continúa, abra la consola del navegador (F12) y recargue.</div>';
+          if (window.console && console.error) {
+            console.error(e);
+          }
+          return;
+        }
         calendar.render();
       })
       .fail(function(xhr) {
-        calendarEl.innerHTML = '<div class="alert alert-danger">No se pudieron cargar los eventos (' + (xhr.status || 'error') + ').</div>';
+        var msg = (xhr.status === 401 || xhr.status === 403)
+          ? 'No autorizado para cargar eventos (' + xhr.status + '). Cierre sesión y vuelva a entrar.'
+          : 'No se pudieron cargar los eventos (' + (xhr.status || 'error') + ').';
+        calendarEl.innerHTML = '<div class="alert alert-danger">' + msg + '</div>';
       });
-    $('#modalEvent').on('hidden.bs.modal', function() {
+    jQuery('#modalEvent').on('hidden.bs.modal', function() {
       $('#actividad_update, #descripcion_update').prop('readonly', false);
       $('#date_end_update, #time_update').prop('readonly', false);
       $('#status_update').prop('disabled', false);
