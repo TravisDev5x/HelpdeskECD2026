@@ -24,6 +24,9 @@
                         @can('receive internal notification ticket closed')
                         <option value="ticket_closed" @selected(($type ?? '') === 'ticket_closed')>Ticket cerrado (otro)</option>
                         @endcan
+                        @can('receive internal notification ticket requester alert')
+                        <option value="ticket_requester_alert" @selected(($type ?? '') === 'ticket_requester_alert')>Alerta solicitante (nota ticket)</option>
+                        @endcan
                         @can('receive internal notification user login')
                         <option value="user_login" @selected(($type ?? '') === 'user_login')>Inicio de sesión</option>
                         @endcan

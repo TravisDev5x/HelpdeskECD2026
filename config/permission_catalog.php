@@ -177,6 +177,10 @@ return [
             'label' => 'Notif. interna: mi ticket cerrado (otro estatus)',
             'description' => 'Recibe aviso cuando un ticket tuyo se cierra con un estatus distinto de resuelto.',
         ],
+        'receive internal notification ticket requester alert' => [
+            'label' => 'Notif. interna: alerta del solicitante en ticket',
+            'description' => 'Recibe en la campana el aviso cuando el solicitante marca «enviar alerta» al añadir una nota visible. Por defecto se asigna a Soporte, Infraestructura, Telecomunicaciones y Mantenimiento.',
+        ],
         'receive internal notification password expiring soon' => [
             'label' => 'Notif. interna: contraseña por vencer',
             'description' => 'Recibe el aviso del panel (y comando helpdesk:notify-password-expiry) cuando tu contraseña está próxima a caducar.',

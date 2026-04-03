@@ -52,6 +52,11 @@ class Service extends Model
     return $this->hasMany(HistoricalServices::class, 'service_id');
   }
 
+  public function ticketNotes()
+  {
+    return $this->hasMany(ServiceTicketNote::class, 'service_id');
+  }
+
   public function scopeAllowed($query)
   {
     $user = auth()->user();

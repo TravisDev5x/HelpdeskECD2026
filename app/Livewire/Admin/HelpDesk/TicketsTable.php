@@ -6,6 +6,7 @@ use App\Models\Area;
 use App\Models\Failure;
 use App\Models\HistoricalServices;
 use App\Models\Service;
+use App\Models\ServiceTicketNote;
 use App\Models\Sede;
 use App\Models\User;
 use App\Support\Tickets\HistoricalServiceEventType;
@@ -13,7 +14,9 @@ use App\Support\Tickets\ServiceActivoCriticoGeneralApproval;
 use App\Support\Tickets\ServiceEscalationApplier;
 use App\Support\Tickets\ServiceFollowUpStatusApplier;
 use App\Support\Tickets\ServiceObservationAppender;
+use App\Support\Tickets\ServiceTicketNoteRecorder;
 use App\Support\Tickets\TicketQueryByRole;
+use App\Support\Tickets\TicketRequesterNote;
 use App\Support\Tickets\TicketStatus;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
@@ -103,6 +106,23 @@ class TicketsTable extends Component
 
     public string $escalarReason = '';
 
+    public bool $showNotasModal = false;
+
+    public ?int $notasServiceId = null;
+
+    public string $notasFailureName = '';
+
+    /** @var list<array{id: int, body: string, visibility: string, visibility_label: string, author_label: string, created_at: string, notify_support: bool}> */
+    public array $notasRows = [];
+
+    public string $notaStaffBody = '';
+
+    public string $notaStaffVisibility = ServiceTicketNote::VIS_INTERNAL;
+
+    public string $notaSolicitanteBody = '';
+
+    public bool $notaSolicitanteNotify = false;
+
     protected $paginationTheme = 'bootstrap';
 
     public function mount(): void
@@ -137,7 +157,8 @@ class TicketsTable extends Component
             || $this->showObservacionesModal
             || $this->showSeguimientoModal
             || $this->showActivoCriticoModal
-            || $this->showEscalarModal;
+            || $this->showEscalarModal
+            || $this->showNotasModal;
     }
 
     #[On('helpdesk-open-ticket-from-url')]
@@ -470,6 +491,159 @@ class TicketsTable extends Component
         session()->flash('flash', 'Observaciones guardadas.');
     }
 
+    public function openNotasModal(int $serviceId): void
+    {
+        $service = Service::query()->with('failure')->findOrFail($serviceId);
+
+        abort_unless(Auth::user()?->can('view', $service), 403);
+
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            abort(403);
+        }
+
+        $this->notasServiceId = $service->id;
+        $this->notasFailureName = $service->failure?->name ?? '—';
+        $this->notasRows = $this->mapNotesForUser($service, $user);
+        $this->notaStaffBody = '';
+        $this->notaStaffVisibility = ServiceTicketNote::VIS_INTERNAL;
+        $this->notaSolicitanteBody = '';
+        $this->notaSolicitanteNotify = false;
+        $this->resetValidation([
+            'notaStaffBody',
+            'notaStaffVisibility',
+            'notaSolicitanteBody',
+        ]);
+        $this->showNotasModal = true;
+    }
+
+    public function closeNotasModal(): void
+    {
+        $this->showNotasModal = false;
+        $this->notasServiceId = null;
+        $this->notasFailureName = '';
+        $this->notasRows = [];
+        $this->notaStaffBody = '';
+        $this->notaStaffVisibility = ServiceTicketNote::VIS_INTERNAL;
+        $this->notaSolicitanteBody = '';
+        $this->notaSolicitanteNotify = false;
+        $this->resetValidation();
+    }
+
+    public function saveNotaStaff(): void
+    {
+        if ($this->notasServiceId === null) {
+            return;
+        }
+
+        $service = Service::query()->findOrFail($this->notasServiceId);
+        abort_unless(Auth::user()?->can('update', $service), 403);
+
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            abort(403);
+        }
+
+        $this->validate([
+            'notaStaffBody' => ['required', 'string', 'max:65535'],
+            'notaStaffVisibility' => ['required', 'string', Rule::in([
+                ServiceTicketNote::VIS_INTERNAL,
+                ServiceTicketNote::VIS_REQUESTER_VISIBLE,
+            ])],
+        ], [], [
+            'notaStaffBody' => 'nota',
+            'notaStaffVisibility' => 'visibilidad',
+        ]);
+
+        ServiceTicketNoteRecorder::addStaffNote(
+            $service,
+            $user,
+            $this->notaStaffBody,
+            $this->notaStaffVisibility
+        );
+
+        $this->notaStaffBody = '';
+        $this->notasRows = $this->mapNotesForUser($service->fresh(), $user);
+        session()->flash('flash', 'Nota guardada.');
+    }
+
+    public function saveNotaSolicitante(): void
+    {
+        if ($this->notasServiceId === null) {
+            return;
+        }
+
+        $service = Service::query()->findOrFail($this->notasServiceId);
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            abort(403);
+        }
+
+        abort_unless(TicketRequesterNote::userMayAddNote($user, $service), 403);
+
+        $this->validate([
+            'notaSolicitanteBody' => ['required', 'string', 'max:65535'],
+        ], [], [
+            'notaSolicitanteBody' => 'mensaje',
+        ]);
+
+        $didNotify = $this->notaSolicitanteNotify;
+
+        ServiceTicketNoteRecorder::addRequesterNote(
+            $service,
+            $user,
+            $this->notaSolicitanteBody,
+            $didNotify
+        );
+
+        $this->notaSolicitanteBody = '';
+        $this->notaSolicitanteNotify = false;
+        $this->notasRows = $this->mapNotesForUser($service->fresh(), $user);
+        session()->flash('flash', $didNotify
+            ? 'Mensaje enviado y alerta registrada para soporte.'
+            : 'Mensaje guardado.');
+    }
+
+    /**
+     * @return list<array{id: int, body: string, visibility: string, visibility_label: string, author_label: string, created_at: string, notify_support: bool}>
+     */
+    private function mapNotesForUser(Service $service, User $user): array
+    {
+        $q = ServiceTicketNote::query()
+            ->where('service_id', $service->id)
+            ->with(['user' => static fn ($rel) => $rel->withTrashed()]);
+
+        if (! $user->can('update', $service)) {
+            $q->where('visibility', ServiceTicketNote::VIS_REQUESTER_VISIBLE);
+        }
+
+        return $q->orderByDesc('created_at')
+            ->get()
+            ->map(function (ServiceTicketNote $n): array {
+                $author = trim(implode(' ', array_filter([
+                    $n->user?->name,
+                    $n->user?->ap_paterno,
+                    $n->user?->ap_materno,
+                ])));
+
+                $vis = $n->visibility === ServiceTicketNote::VIS_REQUESTER_VISIBLE
+                    ? 'Visible para el solicitante'
+                    : 'Solo equipo (interna)';
+
+                return [
+                    'id' => (int) $n->id,
+                    'body' => (string) $n->body,
+                    'visibility' => (string) $n->visibility,
+                    'visibility_label' => $vis,
+                    'author_label' => $author !== '' ? $author : 'Usuario #'.$n->user_id,
+                    'created_at' => $n->created_at ? Carbon::parse($n->created_at)->format('Y-m-d H:i:s') : '',
+                    'notify_support' => (bool) $n->notify_support,
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
     /**
      * @return list<array{
      *   nombre_r: string,
@@ -599,6 +773,11 @@ class TicketsTable extends Component
             $escalarFailures = $q->get();
         }
 
+        $notasModalService = null;
+        if ($this->showNotasModal && $this->notasServiceId !== null) {
+            $notasModalService = Service::query()->find($this->notasServiceId);
+        }
+
         return view('livewire.admin.help-desk.tickets-table', [
             'tickets' => $tickets,
             'authRoleNames' => $authRoleNames,
@@ -606,6 +785,7 @@ class TicketsTable extends Component
             'areas' => Area::query()->orderBy('name')->get(),
             'escalarFailures' => $escalarFailures,
             'helpdeskIsGeneralUser' => $user->hasRole('General'),
+            'notasModalService' => $notasModalService,
         ]);
     }
 }

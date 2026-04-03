@@ -125,6 +125,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'receive internal notification ticket assigned',
             'receive internal notification ticket resolved',
             'receive internal notification ticket closed',
+            'receive internal notification ticket requester alert',
             'receive internal notification password expiring soon',
             'receive internal notification info',
         ] as $internalNotifPerm) {
@@ -181,6 +182,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $role->givePermissionTo([
             'receive internal notification password support',
             'receive internal notification user missing email',
+            'receive internal notification ticket requester alert',
         ]);
 
         $role = Role::create(['name' => 'Metricas']);
@@ -233,6 +235,8 @@ class RolesAndPermissionsSeeder extends Seeder
         $role->givePermissionTo('read bitacoras');
 
         $role->givePermissionTo('read assignmentsIndividual');
+
+        $role->givePermissionTo('receive internal notification ticket requester alert');
 
         $role = Role::create(['name' => 'Basico']);
 

@@ -251,6 +251,7 @@
                                             @endcan
                                             @can('view', $ticket)
                                                 <button type="button" class="btn btn-info btn-xs m-1" title="Ver historial" wire:click="openHistorialModal({{ $ticket->id }})"><i class="fas fa-file-alt"></i></button>
+                                                <button type="button" class="btn btn-secondary btn-xs m-1" title="Notas del ticket (internas y visibles al solicitante)" wire:click="openNotasModal({{ $ticket->id }})"><i class="fas fa-sticky-note"></i></button>
                                             @endcan
                                             @can('escalate', $ticket)
                                                 <button type="button" class="btn btn-warning btn-xs m-1" title="Escalar a otra área de servicio" wire:click="openEscalarModal({{ $ticket->id }})"><i class="fas fa-random"></i></button>
@@ -519,6 +520,124 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if($showNotasModal)
+        <div class="modal-backdrop fade show helpdesk-lw-notas-backdrop"></div>
+        <div
+            class="modal fade show d-block helpdesk-lw-notas-root"
+            tabindex="-1"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="helpdeskNotasLabel"
+            wire:click.self="closeNotasModal"
+            wire:keydown.escape="closeNotasModal"
+            wire:key="helpdesk-notas-{{ $notasServiceId }}"
+        >
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+                <div class="modal-content shadow">
+                    <div class="modal-header bg-dark text-white">
+                        <h5 class="modal-title mb-0" id="helpdeskNotasLabel">
+                            <i class="fas fa-sticky-note mr-2"></i> Notas del ticket
+                            @if($notasServiceId)
+                                <span class="badge badge-light text-dark ml-2">#{{ $notasServiceId }}</span>
+                            @endif
+                        </h5>
+                        <button type="button" class="close text-white" wire:click="closeNotasModal" aria-label="Cerrar">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body pt-2">
+                        <div class="callout bg-light mb-3 helpdesk-modal-callout">
+                            <div class="text-muted text-uppercase small font-weight-bold mb-1">Servicio</div>
+                            <div class="font-weight-bold text-dark text-break">{{ $notasFailureName }}</div>
+                        </div>
+                        <p class="text-muted small mb-2">
+                            @if($notasModalService && auth()->user()->can('update', $notasModalService))
+                                Las notas <strong>internas</strong> solo las ve el personal con permiso de actualizar el ticket. Las <strong>visibles al solicitante</strong> también las verá quien abrió el ticket.
+                            @else
+                                Solo ves las notas marcadas como visibles para el solicitante.
+                            @endif
+                        </p>
+                        <div class="border rounded mb-3" style="max-height: 220px; overflow-y: auto;">
+                            <ul class="list-group list-group-flush mb-0">
+                                @forelse ($notasRows as $row)
+                                    <li class="list-group-item py-2">
+                                        <div class="d-flex flex-wrap align-items-center justify-content-between mb-1">
+                                            <span class="small font-weight-bold text-dark">{{ $row['author_label'] }}</span>
+                                            <span class="small text-muted">{{ $row['created_at'] }}</span>
+                                        </div>
+                                        <div class="mb-1">
+                                            @if($row['visibility'] === \App\Models\ServiceTicketNote::VIS_INTERNAL)
+                                                <span class="badge badge-secondary">Interna</span>
+                                            @else
+                                                <span class="badge badge-info">Visible solicitante</span>
+                                            @endif
+                                            @if(!empty($row['notify_support']))
+                                                <span class="badge badge-warning text-dark"><i class="fas fa-bell mr-1"></i>Alerta soporte</span>
+                                            @endif
+                                        </div>
+                                        <div class="small text-break">{!! nl2br(e($row['body'])) !!}</div>
+                                    </li>
+                                @empty
+                                    <li class="list-group-item text-muted small py-3 text-center">Aún no hay notas en este ticket.</li>
+                                @endforelse
+                            </ul>
+                        </div>
+
+                        @if($notasModalService && auth()->user()->can('update', $notasModalService))
+                            <form wire:submit.prevent="saveNotaStaff" class="border-top pt-3">
+                                <h6 class="font-weight-bold mb-2"><i class="fas fa-user-shield mr-1 text-muted"></i> Agregar nota (equipo)</h6>
+                                <div class="form-group">
+                                    <label for="helpdesk-nota-staff-vis" class="font-weight-bold small">Visibilidad</label>
+                                    <select id="helpdesk-nota-staff-vis" class="custom-select form-control-sm @error('notaStaffVisibility') is-invalid @enderror" wire:model="notaStaffVisibility">
+                                        <option value="{{ \App\Models\ServiceTicketNote::VIS_INTERNAL }}">Solo equipo (interna)</option>
+                                        <option value="{{ \App\Models\ServiceTicketNote::VIS_REQUESTER_VISIBLE }}">Visible para el solicitante</option>
+                                    </select>
+                                    @error('notaStaffVisibility')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label for="helpdesk-nota-staff-body" class="font-weight-bold small">Texto</label>
+                                    <textarea id="helpdesk-nota-staff-body" class="form-control form-control-sm @error('notaStaffBody') is-invalid @enderror" wire:model.lazy="notaStaffBody" rows="3" placeholder="Escribe la nota…"></textarea>
+                                    @error('notaStaffBody')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm" wire:loading.attr="disabled" wire:target="saveNotaStaff">
+                                    <span wire:loading.remove wire:target="saveNotaStaff"><i class="fas fa-save mr-1"></i> Guardar nota</span>
+                                    <span wire:loading wire:target="saveNotaStaff"><i class="fas fa-circle-notch fa-spin mr-1"></i>…</span>
+                                </button>
+                            </form>
+                        @elseif($notasModalService && \App\Support\Tickets\TicketRequesterNote::userMayAddNote(auth()->user(), $notasModalService))
+                            <form wire:submit.prevent="saveNotaSolicitante" class="border-top pt-3">
+                                <h6 class="font-weight-bold mb-2"><i class="fas fa-comment mr-1 text-muted"></i> Tu mensaje sobre el ticket</h6>
+                                <div class="form-group mb-2">
+                                    <textarea id="helpdesk-nota-sol-body" class="form-control form-control-sm @error('notaSolicitanteBody') is-invalid @enderror" wire:model.lazy="notaSolicitanteBody" rows="4" placeholder="Información adicional, aclaraciones…"></textarea>
+                                    @error('notaSolicitanteBody')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="custom-control custom-checkbox mb-2">
+                                    <input type="checkbox" class="custom-control-input" id="helpdesk-nota-sol-notify" wire:model="notaSolicitanteNotify">
+                                    <label class="custom-control-label small" for="helpdesk-nota-sol-notify">Enviar alerta al personal con permiso de notificación (mesa de ayuda: Soporte, Infraestructura, Telecomunicaciones, Mantenimiento)</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm" wire:loading.attr="disabled" wire:target="saveNotaSolicitante">
+                                    <span wire:loading.remove wire:target="saveNotaSolicitante"><i class="fas fa-paper-plane mr-1"></i> Enviar</span>
+                                    <span wire:loading wire:target="saveNotaSolicitante"><i class="fas fa-circle-notch fa-spin mr-1"></i>…</span>
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                    <div class="modal-footer bg-light border-top">
+                        <button type="button" class="btn btn-default" wire:click="closeNotasModal">
+                            <i class="fas fa-times mr-1"></i> Cerrar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
