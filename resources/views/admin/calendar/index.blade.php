@@ -19,7 +19,7 @@
 @endsection
 
 @section('content')
-  {{-- FullCalendar antes cargaba desde adminlte/plugins/fullcalendar (no existe en public); CDN 5.x compatible con el script actual --}}
+  {{-- FullCalendar 5.11.5 desde public/vendor (evita proxy/firewall que sirve CDN como text/plain y rompe plugins). Actualizar: npm run sync-fullcalendar --}}
   <p class="text-muted small mb-2">
     <span class="d-inline-block mr-3"><span class="badge align-middle" style="background:#3788d8">&nbsp;</span> Personal (solo usted)</span>
     @if($canReadTeamCalendar)
@@ -32,19 +32,16 @@
 @endsection
 
 @push('styles')
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@5.11.5/main.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@5.11.5/main.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@5.11.5/main.min.css">
+  <link rel="stylesheet" href="{{ asset('vendor/fullcalendar/5.11.5/main.min.css') }}">
   <style>#calendar { min-height: 70vh; }</style>
 @endpush
 
 @push('scripts')
-  {{-- main.global.min.js expone window.FullCalendar; main.min.js es CJS y no define el global en el navegador --}}
-  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@5.11.5/main.global.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@5.11.5/main.global.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@5.11.5/main.global.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@5.11.5/main.global.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/locales-all.min.js"></script>
+  <script src="{{ asset('vendor/fullcalendar/5.11.5/fc-core.global.min.js') }}"></script>
+  <script src="{{ asset('vendor/fullcalendar/5.11.5/fc-daygrid.global.min.js') }}"></script>
+  <script src="{{ asset('vendor/fullcalendar/5.11.5/fc-timegrid.global.min.js') }}"></script>
+  <script src="{{ asset('vendor/fullcalendar/5.11.5/fc-interaction.global.min.js') }}"></script>
+  <script src="{{ asset('vendor/fullcalendar/5.11.5/locales-all.min.js') }}"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
