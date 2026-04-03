@@ -9,7 +9,6 @@ use Yajra\Datatables\Datatables;
 use CArbon\Carbon;
 use App\Models\Product;
 use App\Models\User;
-use App\Models\AssetUser;
 use App\Models\DescuentoEstado;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -34,23 +33,35 @@ class AssignmentsController extends Controller
 
     public function index()
     {
-        $wordlist = User::where('certification', '0')->get();
-        $wordCount = $wordlist->count();
-        $assets = AssetUser::select('user_id')->distinct()->get();
-        $users = User::select('id')->where('certification', '1')->whereNotIn('id', $assets)->count();
+        $wordCount = $this->countPendingCertificationUsers();
+        $users = $this->countCertifiedUsersWithoutAsset();
 
-        $userSelect = User::select('id', 'name', 'ap_paterno', 'ap_materno')->orderBy('name')->get();
+        $userSelect = User::query()
+            ->select('id', 'name', 'ap_paterno', 'ap_materno', 'usuario')
+            ->orderBy('name')
+            ->get();
+
         return view('admin.assignments.index')->with('count', $wordCount)->with('countChecks', $users)->with('userSelect', $userSelect);
     }
 
     public function getAssignments(Request $request)
     {
+        $withCompany = static function ($q) {
+            $q->select('id', 'name', 'deleted_at');
+        };
 
         if (UserPrimaryRole::name() === 'Mantenimiento') {
-            $products = Product::with('company')->whereNull('employee_id')->whereStatus('OPERABLE')->where('owner', 'Mantenimiento');
+            $products = Product::query()
+                ->with(['company' => $withCompany])
+                ->whereNull('employee_id')
+                ->whereStatus('OPERABLE')
+                ->where('owner', 'Mantenimiento');
         } else {
-
-            $products = Product::with('company')->whereNull('employee_id')->whereStatus('OPERABLE')->where('owner', 'Sistemas');
+            $products = Product::query()
+                ->with(['company' => $withCompany])
+                ->whereNull('employee_id')
+                ->whereStatus('OPERABLE')
+                ->where('owner', 'Sistemas');
         }
 
         return Datatables::of($products)
@@ -64,11 +75,7 @@ class AssignmentsController extends Controller
 
     public function list2()
     {
-        $wordlist = User::where('certification', '0')->get();
-        $wordCount = $wordlist->count();
-        $assets = AssetUser::select('user_id')->distinct()->get();
-        $users = User::select('id')->where('certification', '1')->whereNotIn('id', $assets)->count();
-        return view('admin.assignments.list2')->with('count', $wordCount)->with('countChecks', $users);
+        return view('admin.assignments.list2')->with('count', $this->countPendingCertificationUsers())->with('countChecks', $this->countCertifiedUsersWithoutAsset());
     }
 
     public function getListAssignments(Request $request)
@@ -281,23 +288,41 @@ class AssignmentsController extends Controller
 
     public function removeAssignments()
     {
-        $wordlist = User::where('certification', '0')->get();
-        $wordCount = $wordlist->count();
-        $assets = AssetUser::select('user_id')->distinct()->get();
-        $users = User::select('id')->where('certification', '1')->whereNotIn('id', $assets)->count();
-        return view('admin.assignments.remove')->with('count', $wordCount)->with('countChecks', $users);
+        return view('admin.assignments.remove')
+            ->with('count', $this->countPendingCertificationUsers())
+            ->with('countChecks', $this->countCertifiedUsersWithoutAsset());
     }
 
     public function getDesAssignments(Request $request)
     {
-        if (UserPrimaryRole::name() === 'Mantenimiento') {
-            $products = Product::with('company')->with('employee', 'employee.department')->whereNotNull('employee_id')->where('owner', 'Mantenimiento');
-        } else {
+        $withCompany = static function ($q) {
+            $q->select('id', 'name', 'deleted_at');
+        };
+        $withEmployee = static function ($q) {
+            $q->select('id', 'name', 'ap_paterno', 'ap_materno', 'usuario', 'department_id', 'deleted_at');
+        };
+        $withDepartment = static function ($q) {
+            $q->select('id', 'name', 'deleted_at');
+        };
 
-            $products = Product::with('company')
-                ->with('employee')
+        if (UserPrimaryRole::name() === 'Mantenimiento') {
+            $products = Product::query()
+                ->with([
+                    'company' => $withCompany,
+                    'employee' => $withEmployee,
+                    'employee.department' => $withDepartment,
+                ])
+                ->whereNotNull('employee_id')
+                ->where('owner', 'Mantenimiento');
+        } else {
+            $products = Product::query()
+                ->with([
+                    'company' => $withCompany,
+                    'employee' => $withEmployee,
+                ])
                 ->whereNotNull('employee_id');
         }
+
         return Datatables::of($products)
             ->make(true);
     }
@@ -353,11 +378,9 @@ class AssignmentsController extends Controller
 
     public function log()
     {
-        $wordlist = User::where('certification', '0')->get();
-        $wordCount = $wordlist->count();
-        $assets = AssetUser::select('user_id')->distinct()->get();
-        $users = User::select('id')->where('certification', '1')->whereNotIn('id', $assets)->count();
-        return view('admin.assignments.log')->with('count', $wordCount)->with('countChecks', $users);
+        return view('admin.assignments.log')
+            ->with('count', $this->countPendingCertificationUsers())
+            ->with('countChecks', $this->countCertifiedUsersWithoutAsset());
     }
 
     public function getLogAssignments(Request $request)
@@ -367,12 +390,14 @@ class AssignmentsController extends Controller
         $query = Assignment::query()
             ->with([
                 'user' => function ($q) {
-                    $q->withTrashed()->select('id', 'name', 'ap_paterno', 'ap_materno');
+                    $q->withTrashed()->select('id', 'name', 'ap_paterno', 'ap_materno', 'deleted_at');
                 },
                 'employee' => function ($q) {
-                    $q->withTrashed()->select('id', 'name', 'ap_paterno', 'ap_materno', 'usuario');
+                    $q->withTrashed()->select('id', 'name', 'ap_paterno', 'ap_materno', 'usuario', 'deleted_at');
                 },
-                'product',
+                'product' => function ($q) {
+                    $q->select('id', 'name', 'serie', 'marca', 'modelo', 'deleted_at');
+                },
             ]);
 
         return Datatables::of($query)
@@ -465,11 +490,9 @@ class AssignmentsController extends Controller
 
     public function revisionIndex()
     {
-        $wordlist = User::where('certification', '0')->get();
-        $wordCount = $wordlist->count();
-        $assets = AssetUser::select('user_id')->distinct()->get();
-        $users = User::select('id')->where('certification', '1')->whereNotIn('id', $assets)->count();
-        return view('admin.assignments.revision_list')->with('count', $wordCount)->with('countChecks', $users);
+        return view('admin.assignments.revision_list')
+            ->with('count', $this->countPendingCertificationUsers())
+            ->with('countChecks', $this->countCertifiedUsersWithoutAsset());
     }
 
     public function revisionShow($user, $name)
@@ -498,5 +521,27 @@ class AssignmentsController extends Controller
             ->addColumn('action', 'admin.assignments.action')
             ->rawColumns(['action'])
             ->toJson();
+    }
+
+    /** Usuarios con certificación pendiente (mismo criterio que antes, sin cargar filas en memoria). */
+    private function countPendingCertificationUsers(): int
+    {
+        return User::query()->where('certification', '0')->count();
+    }
+
+    /**
+     * Usuarios certificados que no aparecen en asset_users (subconsulta; evita pluck masivo de IDs).
+     */
+    private function countCertifiedUsersWithoutAsset(): int
+    {
+        return User::query()
+            ->where('certification', '1')
+            ->whereNotExists(function ($q) {
+                $q->selectRaw('1')
+                    ->from('asset_users')
+                    ->whereColumn('asset_users.user_id', 'users.id')
+                    ->whereNull('asset_users.deleted_at');
+            })
+            ->count();
     }
 }

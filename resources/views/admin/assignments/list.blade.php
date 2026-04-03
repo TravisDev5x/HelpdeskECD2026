@@ -80,6 +80,7 @@
     $('#assignments-table').DataTable({
       "processing": true,
       "serverSide": true,
+      "deferRender": true,
       "paging": true,
       "lengthChange": true,
       "searching": true,

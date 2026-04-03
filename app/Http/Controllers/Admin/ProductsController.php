@@ -49,10 +49,20 @@ class ProductsController extends Controller
     {
         $roleName = UserPrimaryRole::name() ?? '';
 
-        // 2. Consulta (Con select explicito para evitar error de SoftDeletes)
+        // 2. Consulta: eager load acotado (menos columnas por fila en JSON / menos RAM en DataTables).
         $query = Product::query()
             ->select('products.*')
-            ->with(['company', 'employee']);
+            ->with([
+                'company' => static function ($q) {
+                    $q->select('id', 'name', 'deleted_at');
+                },
+                'employee' => static function ($q) {
+                    $q->select('id', 'name', 'ap_paterno', 'ap_materno', 'campaign_id', 'deleted_at');
+                },
+                'employee.campaign' => static function ($q) {
+                    $q->select('id', 'name', 'deleted_at');
+                },
+            ]);
 
         // 3. Filtros por rol (capa compartida con reportes/export)
         ProductOwnerCatalog::applyProductsListOwnerFilter($query, $roleName);

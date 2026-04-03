@@ -106,6 +106,7 @@
         table = $('#example').DataTable({
           "processing": true,
         //   "serverSide": true,
+          "deferRender": true,
           "paging": true,
           "lengthChange": true,
           "searching": true,

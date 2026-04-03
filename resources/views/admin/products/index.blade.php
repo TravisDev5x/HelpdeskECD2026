@@ -135,6 +135,7 @@
         var table = $('#products-table').DataTable({
             processing: true,
             serverSide: true,
+            deferRender: true,
             responsive: true,
             ajax: config.routes.ajaxIndex,
             order: [[0, 'desc']],
