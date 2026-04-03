@@ -26,7 +26,7 @@
         'admin.companies*', 'admin.sedes*', 'admin.ubicaciones*', 'admin.departments*',
         'admin.positions*', 'admin.failures*', 'admin.campaigns*', 'did*',
         'admin.assets*', 'admin.tests*', 'admin.nivel', 'admin.permissions*',
-        'admin.roles*', 'admin.bitacora*', 'admin.bitacoraHost*', 'admin.agenda*'
+        'admin.roles*',
     ]);
 
     $canAccessConfig = $user && (
@@ -36,8 +36,17 @@
         $user->can('read positions') || $user->can('read failures') ||
         $user->can('read campaigns') || $user->can('modulo.did') ||
         $user->can('read assets') || $user->can('read tests') ||
-        $user->can('read roles') || $user->can('read bitacoras') ||
-        $user->can('read bitacorasHost')
+        $user->can('read roles')
+    );
+
+    $isAgendaBitacorasActive = request()->routeIs([
+        'admin.bitacora*', 'admin.bitacoraHost*', 'admin.agenda*',
+    ]);
+
+    $canAccessAgendaBitacoras = $user && (
+        $user->can('read bitacoras')
+        || $user->can('read bitacorasHost')
+        || ($user->hasRole('Admin') && $user->can('read calendar'))
     );
 
     // Inventario V2: árbol si hay lectura operativa, «mis asignaciones», o gestión de catálogos/config
@@ -481,6 +490,54 @@
         @endif
 
         {{-- ========================================== --}}
+        {{-- BLOQUE: AGENDA Y BITÁCORAS                 --}}
+        {{-- ========================================== --}}
+        @if($canAccessAgendaBitacoras)
+            <li class="nav-header text-muted" style="font-size: 0.8rem;">AGENDA Y BITÁCORAS</li>
+            <li class="nav-item has-treeview {{ $isAgendaBitacorasActive ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ $isAgendaBitacorasActive ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-calendar-alt text-secondary"></i>
+                    <p>Agenda y Bitácoras <i class="right fas fa-angle-left"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                    @can('read bitacoras')
+                        <li class="nav-item">
+                            <a href="{{ route('admin.bitacora.index') }}" class="nav-link {{ request()->routeIs('admin.bitacora.index') ? 'active' : '' }}">
+                                <i class="fa fa-book nav-icon text-secondary"></i><p>Bitácora</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.bitacora.create') }}" class="nav-link {{ request()->routeIs('admin.bitacora.create') ? 'active' : '' }}">
+                                <i class="fas fa-pencil-alt nav-icon text-secondary"></i><p>Crear Bitácora</p>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('read bitacorasHost')
+                        <li class="nav-item">
+                            <a href="{{ route('admin.bitacoraHost.index') }}" class="nav-link {{ request()->routeIs('admin.bitacoraHost.index') ? 'active' : '' }}">
+                                <i class="fa fa-server nav-icon text-secondary"></i><p>Bitácora Hosts</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.bitacoraHost.create') }}" class="nav-link {{ request()->routeIs('admin.bitacoraHost.create') ? 'active' : '' }}">
+                                <i class="fas fa-pencil-alt nav-icon text-secondary"></i><p>Crear Bitácora Host</p>
+                            </a>
+                        </li>
+                    @endcan
+                    @role('Admin')
+                        @can('read calendar')
+                            <li class="nav-item">
+                                <a href="{{ route('admin.agenda.index') }}" class="nav-link {{ request()->routeIs('admin.agenda.index') ? 'active' : '' }}">
+                                    <i class="fas fa-calendar-alt nav-icon text-secondary"></i><p>Agenda</p>
+                                </a>
+                            </li>
+                        @endcan
+                    @endrole
+                </ul>
+            </li>
+        @endif
+
+        {{-- ========================================== --}}
         {{-- BLOQUE: CONFIGURACIÓN                      --}}
         {{-- ========================================== --}}
         @if($canAccessConfig)
@@ -536,39 +593,6 @@
                             </ul>
                         </li>
                     @endcan
-                    @can('read bitacoras')
-                        <li class="nav-item">
-                            <a href="{{ route('admin.bitacora.index') }}" class="nav-link {{ request()->routeIs('admin.bitacora.index') ? 'active' : '' }}">
-                                <i class="fa fa-book nav-icon text-secondary"></i><p>Bitácora</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('admin.bitacora.create') }}" class="nav-link {{ request()->routeIs('admin.bitacora.create') ? 'active' : '' }}">
-                                <i class="fas fa-pencil-alt nav-icon text-secondary"></i><p>Crear Bitácora</p>
-                            </a>
-                        </li>
-                    @endcan
-                    @can('read bitacorasHost')
-                        <li class="nav-item">
-                            <a href="{{ route('admin.bitacoraHost.index') }}" class="nav-link {{ request()->routeIs('admin.bitacoraHost.index') ? 'active' : '' }}">
-                                <i class="fa fa-server nav-icon text-secondary"></i><p>Bitácora Hosts</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('admin.bitacoraHost.create') }}" class="nav-link {{ request()->routeIs('admin.bitacoraHost.create') ? 'active' : '' }}">
-                                <i class="fas fa-pencil-alt nav-icon text-secondary"></i><p>Crear Bitácora Host</p>
-                            </a>
-                        </li>
-                    @endcan
-                    @role('Admin')
-                        @can('read calendar')
-                            <li class="nav-item">
-                                <a href="{{ route('admin.agenda.index') }}" class="nav-link {{ request()->routeIs('admin.agenda.index') ? 'active' : '' }}">
-                                    <i class="fas fa-calendar-alt nav-icon text-secondary"></i><p>Agenda</p>
-                                </a>
-                            </li>
-                        @endcan
-                    @endrole
                 </ul>
             </li>
         @endif
