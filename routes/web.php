@@ -112,8 +112,8 @@ Route::prefix('admin')
         // Agenda / Calendario
         Route::get('calendar', [CalendarController::class, 'index'])->name('admin.agenda.index')->middleware('permission:read calendar');
         Route::post('calendar/store', [CalendarController::class, 'store'])->name('admin.agenda.store')->middleware('permission:read calendar');
-        Route::get('get_calendar', [CalendarController::class, 'get_calendar'])->middleware('permission:read calendar');
-        Route::get('get-event', [CalendarController::class, 'get_event'])->middleware('permission:read calendar');
+        Route::get('get_calendar', [CalendarController::class, 'get_calendar'])->name('admin.agenda.get_calendar')->middleware('permission:read calendar');
+        Route::get('get-event', [CalendarController::class, 'get_event'])->name('admin.agenda.get_event')->middleware('permission:read calendar');
         Route::post('calendar/update', [CalendarController::class, 'update'])->name('admin.agenda.update')->middleware('permission:read calendar');
 
         // --- Gestión de Usuarios (Livewire) ---

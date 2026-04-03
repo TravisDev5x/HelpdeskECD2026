@@ -109,12 +109,17 @@ class CalendarController extends Controller
             
         }
 
-        return $data;
+        return response()->json($data);
     }
 
-    public function get_event(Request $request){
-        $calendar = Calendar::find($request->id);
+    public function get_event(Request $request)
+    {
+        $calendar = Calendar::query()
+            ->where('user_id', auth()->id())
+            ->find($request->id);
 
-        return $calendar;
+        return $calendar
+            ? response()->json($calendar)
+            : response()->json(['message' => 'No encontrado'], 404);
     }
 }
