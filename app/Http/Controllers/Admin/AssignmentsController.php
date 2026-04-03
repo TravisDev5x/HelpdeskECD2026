@@ -362,17 +362,21 @@ class AssignmentsController extends Controller
 
     public function getLogAssignments(Request $request)
     {
-        $assignments = Assignment::with([
-            'user' => function ($query) {
-                $query->withTrashed()->select('name', 'ap_paterno', 'ap_materno', 'id')->get();
-            },
-            'employee' => function ($query) {
-                $query->withTrashed()->select('id', 'name', 'ap_paterno', 'ap_materno', 'usuario')->get();
-            },
-            'product'
-        ])->get();
+        // No usar ->get() dentro de los closures de with(): rompe el eager loading y puede provocar 500.
+        // user y employee son BelongsTo al mismo modelo/tabla (users): Yajra necesita alias distintos al ordenar/buscar.
+        $query = Assignment::query()
+            ->with([
+                'user' => function ($q) {
+                    $q->withTrashed()->select('id', 'name', 'ap_paterno', 'ap_materno');
+                },
+                'employee' => function ($q) {
+                    $q->withTrashed()->select('id', 'name', 'ap_paterno', 'ap_materno', 'usuario');
+                },
+                'product',
+            ]);
 
-        return Datatables::of($assignments)
+        return Datatables::of($query)
+            ->enableEagerJoinAliases()
             ->make(true);
     }
 
