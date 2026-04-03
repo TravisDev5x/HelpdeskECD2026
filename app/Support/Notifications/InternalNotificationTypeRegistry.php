@@ -2,11 +2,14 @@
 
 namespace App\Support\Notifications;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * Tipos almacenados en data.type de {@see \App\Notifications\InternalUserNotification} y filtros del panel.
+ *
+ * Tipos con permiso: solo se entregan y muestran a usuarios con el permiso correspondiente (matriz de roles).
  */
 final class InternalNotificationTypeRegistry
 {
@@ -23,9 +26,17 @@ final class InternalNotificationTypeRegistry
         'info',
     ];
 
-    /** Ocultos en listados para usuarios sin rol Admin (p. ej. avisos de login). */
-    public const HIDDEN_UNLESS_ADMIN = [
-        'user_login',
+    /**
+     * Permiso Spatie requerido para recibir (y ver en campana/listado) notificaciones de cada tipo.
+     * Tipos no listados: sin filtro por permiso (p. ej. ticket asignado al propio usuario).
+     *
+     * @var array<string, string>
+     */
+    public const TYPE_RECEIVE_PERMISSION = [
+        'ticket_created' => 'receive internal notification ticket created',
+        'user_login' => 'receive internal notification user login',
+        'password_support_request' => 'receive internal notification password support',
+        'user_missing_email' => 'receive internal notification user missing email',
     ];
 
     public static function normalizedFilter(?string $type): ?string
@@ -38,12 +49,16 @@ final class InternalNotificationTypeRegistry
     }
 
     /**
-     * @param  Relation|\Illuminate\Database\Eloquent\Builder  $query  p. ej. MorphMany de {@see \Illuminate\Notifications\Notifiable::notifications()}
+     * Oculta filas cuyo tipo exige un permiso que el usuario no tiene (defensa en profundidad).
+     *
+     * @param  Relation|\Illuminate\Database\Eloquent\Builder  $query
      */
-    public static function applyHiddenTypesForNonAdmin(Relation|Builder $query): void
+    public static function applyVisibilityByPermissions(Relation|Builder $query, User $user): void
     {
-        foreach (self::HIDDEN_UNLESS_ADMIN as $hiddenType) {
-            $query->where('data', 'not like', '%"type":"'.$hiddenType.'"%');
+        foreach (self::TYPE_RECEIVE_PERMISSION as $type => $permission) {
+            if (! $user->can($permission)) {
+                $query->where('data', 'not like', '%"type":"'.$type.'"%');
+            }
         }
     }
 

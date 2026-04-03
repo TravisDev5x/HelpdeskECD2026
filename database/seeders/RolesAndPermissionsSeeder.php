@@ -111,6 +111,17 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'modulo.ubicaciones']);
         Permission::create(['name' => 'read calendar']);
 
+        foreach ([
+            'receive internal notification ticket created',
+            'receive internal notification user login',
+            'receive internal notification password support',
+            'receive internal notification user missing email',
+        ] as $internalNotifPerm) {
+            Permission::firstOrCreate(
+                ['name' => $internalNotifPerm, 'guard_name' => config('auth.defaults.guard', 'web')]
+            );
+        }
+
         $role = Role::create(['name' => 'Admin']);
         $role->givePermissionTo(Permission::all());
 
@@ -155,6 +166,11 @@ class RolesAndPermissionsSeeder extends Seeder
         $role->givePermissionTo('read bitacoras');
 
         $role->givePermissionTo('read assignmentsIndividual');
+
+        $role->givePermissionTo([
+            'receive internal notification password support',
+            'receive internal notification user missing email',
+        ]);
 
         $role = Role::create(['name' => 'Metricas']);
         $role->givePermissionTo('create service');

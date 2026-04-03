@@ -22,7 +22,9 @@ use Illuminate\Support\Facades\Gate;
 use App\Support\Tickets\ServiceActivoCriticoGeneralApproval;
 use App\Support\Tickets\ServiceFollowUpStatusApplier;
 use App\Support\Tickets\ServiceObservationAppender;
+use App\Support\Notifications\InternalNotificationRecipients;
 use App\Support\Tickets\TicketQueryByRole;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -69,7 +71,10 @@ class ServicesController extends Controller
     // Nuevo ticket: aviso en panel y correo solo para Admin (Soporte/Infra ven notifs de tickets asignados a ellos).
     $failure = Failure::with('area')->find($data['failure_id']);
     if ($failure) {
-      $users = User::role('Admin')->whereNotNull('email')->get();
+      $users = InternalNotificationRecipients::withPermissionScoped(
+          'receive internal notification ticket created',
+          static fn (Builder $q) => $q->whereNotNull('email')
+      );
 
       $ticketUrl = route('home') . '?id=' . $service->id;
       $messageBody = sprintf(

@@ -5,6 +5,7 @@ namespace App\Livewire\Auth;
 use App\Models\User;
 use App\Notifications\InternalUserNotification;
 use App\Providers\RouteServiceProvider;
+use App\Support\Notifications\InternalNotificationRecipients;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Http\Response;
@@ -111,7 +112,7 @@ class Login extends Component
 
     private function notifySupportMissingEmail(User $user): void
     {
-        $recipients = User::role(['Admin', 'Soporte'])->get();
+        $recipients = InternalNotificationRecipients::withPermission('receive internal notification user missing email');
         if ($recipients->isEmpty()) {
             return;
         }

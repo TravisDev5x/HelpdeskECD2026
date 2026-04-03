@@ -94,14 +94,12 @@ class User extends Authenticatable
     public function calendar(){ return $this->hasMany(Calendar::class); }
     public function username() { return 'usuario'; }
     /**
-     * Notificaciones internas: los avisos de inicio de sesión solo los deben ver administradores.
+     * Notificaciones internas: tipos sensibles se filtran según permisos modulares (matriz Spatie).
      */
     public function visibleNotifications()
     {
         $q = $this->notifications();
-        if (! $this->hasRole('Admin')) {
-            InternalNotificationTypeRegistry::applyHiddenTypesForNonAdmin($q);
-        }
+        InternalNotificationTypeRegistry::applyVisibilityByPermissions($q, $this);
 
         return $q;
     }
@@ -109,9 +107,7 @@ class User extends Authenticatable
     public function visibleUnreadNotifications()
     {
         $q = $this->unreadNotifications();
-        if (! $this->hasRole('Admin')) {
-            InternalNotificationTypeRegistry::applyHiddenTypesForNonAdmin($q);
-        }
+        InternalNotificationTypeRegistry::applyVisibilityByPermissions($q, $this);
 
         return $q;
     }

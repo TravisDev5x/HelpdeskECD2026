@@ -18,6 +18,7 @@ return [
         'bitacora' => ['label' => 'Bitácoras', 'sort' => 70],
         'activos_certificacion' => ['label' => 'Activos, pruebas e incidencias', 'sort' => 80],
         'modulos' => ['label' => 'Módulos (DID, ubicaciones, calendario)', 'sort' => 90],
+        'notificaciones' => ['label' => 'Notificaciones internas (campana)', 'sort' => 95],
         'otros' => ['label' => 'Otros', 'sort' => 999],
     ],
 
@@ -34,6 +35,7 @@ return [
         ['group' => 'bitacora', 'pattern' => '/bitacora/'],
         ['group' => 'activos_certificacion', 'pattern' => '/\b(asset|test|incident|certification)/'],
         ['group' => 'modulos', 'pattern' => '/^(modulo\.|read calendar)/'],
+        ['group' => 'notificaciones', 'pattern' => '/^receive internal notification\b/'],
         ['group' => 'otros', 'pattern' => '/.*/'],
     ],
 
@@ -133,6 +135,22 @@ return [
         'read reports inventory' => [
             'label' => 'Reportes: detalle inventario (clásico)',
             'description' => 'Reportes de inventario del módulo administrativo; distinto del inventario V2 Livewire.',
+        ],
+        'receive internal notification ticket created' => [
+            'label' => 'Notif. interna: nuevo ticket',
+            'description' => 'Recibe en la campana el aviso cuando se crea un ticket (y el correo paralelo si tiene email). Quien no lo tenga no entra en la lista de destinatarios.',
+        ],
+        'receive internal notification user login' => [
+            'label' => 'Notif. interna: inicio de sesión de usuarios',
+            'description' => 'Recibe avisos cuando otro usuario inicia sesión (auditoría). No se notifica a uno mismo.',
+        ],
+        'receive internal notification password support' => [
+            'label' => 'Notif. interna: solicitud ayuda acceso / contraseña',
+            'description' => 'Recibe el aviso cuando alguien usa el formulario de apoyo desde recuperación de acceso.',
+        ],
+        'receive internal notification user missing email' => [
+            'label' => 'Notif. interna: usuario sin correo',
+            'description' => 'Recibe aviso cuando un usuario entra o restablece sesión sin email en su perfil (regularizar cuenta).',
         ],
     ],
 ];

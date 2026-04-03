@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use App\Models\AuthenticationLog; // Asegúrate de importar tu modelo
 use App\Models\User;
 use App\Notifications\InternalUserNotification;
+use App\Support\Notifications\InternalNotificationRecipients;
 use Illuminate\Support\Facades\Notification;
 
 class LogUserActivity
@@ -23,14 +24,16 @@ class LogUserActivity
             'login_at' => Carbon::now(),
         ]);
 
-        // Solo administradores reciben (y ven) avisos de inicio de sesión en el panel.
-        $admins = User::role('Admin')
-            ->where('id', '<>', $event->user->id)
-            ->get();
+        $recipients = InternalNotificationRecipients::withPermissionScoped(
+            'receive internal notification user login',
+            static function ($q) use ($event) {
+                $q->where('id', '<>', $event->user->id);
+            }
+        );
 
-        if ($admins->isNotEmpty()) {
+        if ($recipients->isNotEmpty()) {
             Notification::send(
-                $admins,
+                $recipients,
                 new InternalUserNotification(
                     'Inicio de sesión',
                     'El usuario ' . $event->user->name . ' (' . $event->user->usuario . ') inició sesión.',

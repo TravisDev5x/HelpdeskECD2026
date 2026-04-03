@@ -12,11 +12,22 @@
                 <form action="{{ route('admin.notifications.index') }}" method="GET" class="d-inline mr-2">
                     <select name="type" class="custom-select custom-select-sm" onchange="this.form.submit()">
                         <option value="">Todos los tipos</option>
+                        @can('receive internal notification ticket created')
                         <option value="ticket_created" @selected(($type ?? '') === 'ticket_created')>Ticket creado</option>
+                        @endcan
                         <option value="ticket_assigned" @selected(($type ?? '') === 'ticket_assigned')>Ticket asignado</option>
                         <option value="ticket_resolved" @selected(($type ?? '') === 'ticket_resolved')>Ticket resuelto</option>
                         <option value="ticket_closed" @selected(($type ?? '') === 'ticket_closed')>Ticket cerrado (otro)</option>
-                        <option value="user_login" @selected(($type ?? '') === 'user_login')>Inicio de sesión (solo admin)</option>
+                        @can('receive internal notification user login')
+                        <option value="user_login" @selected(($type ?? '') === 'user_login')>Inicio de sesión</option>
+                        @endcan
+                        @can('receive internal notification password support')
+                        <option value="password_support_request" @selected(($type ?? '') === 'password_support_request')>Solicitud ayuda acceso</option>
+                        @endcan
+                        @can('receive internal notification user missing email')
+                        <option value="user_missing_email" @selected(($type ?? '') === 'user_missing_email')>Usuario sin correo</option>
+                        @endcan
+                        <option value="password_expiring_soon" @selected(($type ?? '') === 'password_expiring_soon')>Contraseña por vencer</option>
                     </select>
                 </form>
                 <form action="{{ route('admin.notifications.read-all') }}" method="POST" class="d-inline">

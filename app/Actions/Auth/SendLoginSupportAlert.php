@@ -4,6 +4,7 @@ namespace App\Actions\Auth;
 
 use App\Models\User;
 use App\Notifications\InternalUserNotification;
+use App\Support\Notifications\InternalNotificationRecipients;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 
@@ -22,7 +23,7 @@ final class SendLoginSupportAlert
             ->orWhere('email', $identifier)
             ->first();
 
-        $recipients = User::role(['Admin', 'Soporte'])->get();
+        $recipients = InternalNotificationRecipients::withPermission('receive internal notification password support');
 
         if ($recipients->isEmpty()) {
             return;

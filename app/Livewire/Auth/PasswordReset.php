@@ -4,6 +4,7 @@ namespace App\Livewire\Auth;
 
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use App\Support\Notifications\InternalNotificationRecipients;
 use App\Notifications\InternalUserNotification;
 use Illuminate\Auth\Events\PasswordReset as PasswordResetEvent;
 use Illuminate\Support\Facades\Auth;
@@ -113,7 +114,7 @@ class PasswordReset extends Component
 
     private function notifySupportMissingEmail(User $user): void
     {
-        $recipients = User::role(['Admin', 'Soporte'])->get();
+        $recipients = InternalNotificationRecipients::withPermission('receive internal notification user missing email');
         if ($recipients->isEmpty()) {
             return;
         }

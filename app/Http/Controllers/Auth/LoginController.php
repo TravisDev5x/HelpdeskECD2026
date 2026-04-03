@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\InternalUserNotification;
+use App\Support\Notifications\InternalNotificationRecipients;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -98,7 +99,7 @@ class LoginController extends Controller
      */
     private function notifySupportMissingEmail(User $user): void
     {
-        $recipients = User::role(['Admin', 'Soporte'])->get();
+        $recipients = InternalNotificationRecipients::withPermission('receive internal notification user missing email');
         if ($recipients->isEmpty()) {
             return;
         }
