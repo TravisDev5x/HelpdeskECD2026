@@ -13,12 +13,12 @@
                         @error('editName')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="editApPaterno">Apellido Paterno</label>
+                        <label for="editApPaterno">Apellido paterno</label>
                         <input id="editApPaterno" type="text" wire:model="editApPaterno" class="form-control @error('editApPaterno') is-invalid @enderror">
                         @error('editApPaterno')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="editApMaterno">Apellido Materno</label>
+                        <label for="editApMaterno">Apellido materno</label>
                         <input id="editApMaterno" type="text" wire:model="editApMaterno" class="form-control @error('editApMaterno') is-invalid @enderror">
                         @error('editApMaterno')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
@@ -28,19 +28,19 @@
                         @error('editUsuario')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="editPhone">Teléfono</label>
+                        <label for="editPhone">Teléfono <span class="text-muted font-weight-normal">(opcional, único)</span></label>
                         <input id="editPhone" type="text" wire:model="editPhone" maxlength="10" class="form-control @error('editPhone') is-invalid @enderror" placeholder="10 dígitos">
                         @error('editPhone')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="editEmail">Email</label>
+                        <label for="editEmail">Correo electrónico</label>
                         <input id="editEmail" type="email" wire:model="editEmail" class="form-control @error('editEmail') is-invalid @enderror">
                         @error('editEmail')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="editAreaId">Área</label>
-                        <select id="editAreaId" class="custom-select @error('editAreaId') is-invalid @enderror" wire:model.live="editAreaId" required>
-                            <option value="" disabled>Seleccione un área...</option>
+                        <label for="editAreaId">Área <span class="text-muted font-weight-normal">(opcional)</span></label>
+                        <select id="editAreaId" class="custom-select @error('editAreaId') is-invalid @enderror" wire:model="editAreaId">
+                            <option value="">Sin área</option>
                             @foreach ($areas as $area)
                                 <option value="{{ $area->id }}">{{ $area->name }}</option>
                             @endforeach
@@ -48,9 +48,9 @@
                         @error('editAreaId')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="editDepartmentId">Departamento</label>
-                        <select id="editDepartmentId" class="custom-select @error('editDepartmentId') is-invalid @enderror" wire:model.live="editDepartmentId" required>
-                            <option value="" disabled>Seleccione un departamento...</option>
+                        <label for="editDepartmentId">Departamento <span class="text-muted font-weight-normal">(opcional)</span></label>
+                        <select id="editDepartmentId" class="custom-select @error('editDepartmentId') is-invalid @enderror" wire:model="editDepartmentId">
+                            <option value="">Sin departamento</option>
                             @foreach ($editDepartments as $department)
                                 <option value="{{ $department->id }}">{{ $department->name }}</option>
                             @endforeach
@@ -58,9 +58,9 @@
                         @error('editDepartmentId')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="editPositionId">Puesto</label>
-                        <select id="editPositionId" class="custom-select @error('editPositionId') is-invalid @enderror" wire:model="editPositionId" required>
-                            <option value="" disabled>Seleccione un puesto...</option>
+                        <label for="editPositionId">Puesto <span class="text-muted font-weight-normal">(opcional)</span></label>
+                        <select id="editPositionId" class="custom-select @error('editPositionId') is-invalid @enderror" wire:model="editPositionId">
+                            <option value="">Sin puesto</option>
                             @foreach ($editPositions as $position)
                                 <option value="{{ $position->id }}">{{ $position->name }}</option>
                             @endforeach

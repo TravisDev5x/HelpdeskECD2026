@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Users;
 
+use App\Livewire\Admin\Users\Concerns\ValidatesUserOrganizationalFields;
 use App\Models\Area;
 use App\Models\Campaign;
 use App\Models\Department;
@@ -14,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -26,6 +28,7 @@ use Spatie\Permission\Models\Role;
 #[Title('| Usuarios')]
 class UsersIndex extends Component
 {
+    use ValidatesUserOrganizationalFields;
     use WithFileUploads;
     use WithPagination;
 
@@ -132,25 +135,15 @@ class UsersIndex extends Component
             ->orderBy('users.created_at')
             ->paginate($this->perPage);
 
-        $areas = Area::orderBy('name')->get(['id', 'name']);
-        $allDepartments = Department::orderBy('name')->get(['id', 'name', 'area_id']);
-        $allPositions = Position::orderBy('name')->get(['id', 'name', 'department_id']);
-
-        $departments = $this->filterCascade($allDepartments, 'area_id', $this->createAreaId);
-        $editDepartments = $this->filterCascade($allDepartments, 'area_id', $this->editAreaId);
-
-        $positions = $this->filterCascade($allPositions, 'department_id', $this->createDepartmentId);
-        $editPositions = $this->filterCascade($allPositions, 'department_id', $this->editDepartmentId);
-
         return view('livewire.admin.users.users-index', [
             'users' => $users,
             'activeCount' => User::whereNull('deleted_at')->count(),
             'trashedCount' => User::onlyTrashed()->count(),
-            'areas' => $areas,
-            'departments' => $departments,
-            'positions' => $positions,
-            'editDepartments' => $editDepartments,
-            'editPositions' => $editPositions,
+            'areas' => Area::orderBy('name')->get(['id', 'name']),
+            'departments' => Department::orderBy('name')->get(['id', 'name']),
+            'positions' => Position::orderBy('name')->get(['id', 'name']),
+            'editDepartments' => Department::orderBy('name')->get(['id', 'name']),
+            'editPositions' => Position::orderBy('name')->get(['id', 'name']),
             'campaigns' => Campaign::orderBy('name')->get(['id', 'name']),
             'sedes' => Sede::orderBy('sede')->get(['id', 'sede']),
             'roles' => Role::where('name', '<>', 'admin')->select('id', 'name', 'description')->orderBy('name')->get(),
@@ -300,36 +293,28 @@ class UsersIndex extends Component
     {
         abort_unless(Auth::user()->can('create user'), 403);
 
+        $this->createEmail = trim((string) ($this->createEmail ?? ''));
+        $this->createPhone = $this->nullableString($this->createPhone);
+
         $validated = $this->validate([
             'createName' => ['required', 'string', 'max:255'],
             'createApPaterno' => ['required', 'string', 'max:255'],
             'createApMaterno' => ['required', 'string', 'max:255'],
             'createUsuario' => ['required', 'string', 'max:255', 'unique:users,usuario'],
-            'createPhone' => ['nullable', 'string', 'size:10'],
-            'createEmail' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'createAreaId' => ['required', 'integer', 'exists:areas,id'],
-            'createDepartmentId' => ['required', 'integer', 'exists:departments,id'],
-            'createPositionId' => ['required', 'integer', 'exists:positions,id'],
+            'createPhone' => ['nullable', 'string', 'size:10', Rule::unique('users', 'phone')],
+            'createEmail' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
+            'createAreaId' => ['nullable', 'integer', 'exists:areas,id'],
+            'createDepartmentId' => ['nullable', 'integer', 'exists:departments,id'],
+            'createPositionId' => ['nullable', 'integer', 'exists:positions,id'],
             'createCampaignId' => ['nullable', 'integer', 'exists:campaigns,id'],
             'createRoleId' => [$this->canSelectRole ? 'required' : 'nullable', 'integer', 'exists:roles,id'],
             'createSedes' => ['nullable', 'array'],
             'createSedes.*' => ['integer', 'exists:sedes,id'],
         ], [
             'createRoleId.required' => 'Selecciona un rol para el usuario.',
+            'createEmail.unique' => 'Ese correo electrónico ya está registrado.',
+            'createPhone.unique' => 'Ese número de teléfono ya está registrado.',
         ]);
-
-        $department = Department::findOrFail((int) $validated['createDepartmentId']);
-        $position = Position::findOrFail((int) $validated['createPositionId']);
-
-        if ((int) $position->department_id !== (int) $department->id) {
-            $this->addError('createPositionId', 'El puesto seleccionado no pertenece al departamento elegido.');
-            return;
-        }
-
-        if ($department->area_id !== null && (int) $department->area_id !== (int) $validated['createAreaId']) {
-            $this->addError('createDepartmentId', 'El departamento seleccionado no pertenece al área elegida.');
-            return;
-        }
 
         $temporalPassword = Str::password(12);
 
@@ -339,10 +324,10 @@ class UsersIndex extends Component
             'ap_materno' => trim($validated['createApMaterno']),
             'usuario' => trim($validated['createUsuario']),
             'phone' => $validated['createPhone'],
-            'email' => $validated['createEmail'],
-            'area_id' => $validated['createAreaId'],
-            'department_id' => $validated['createDepartmentId'],
-            'position_id' => $validated['createPositionId'],
+            'email' => trim($validated['createEmail']),
+            'area_id' => $validated['createAreaId'] ?? null,
+            'department_id' => $validated['createDepartmentId'] ?? null,
+            'position_id' => $validated['createPositionId'] ?? null,
             'campaign_id' => $validated['createCampaignId'] ?? null,
             'password' => $temporalPassword,
             'password_expires_at' => Carbon::now(),
@@ -366,39 +351,10 @@ class UsersIndex extends Component
         }
 
         $this->lastGeneratedPassword = $temporalPassword;
-        $this->lastCreatedUserName = trim($validated['createName']) . ' ' . trim($validated['createApPaterno']);
+        $this->lastCreatedUserName = trim($validated['createName']).' '.trim($validated['createApPaterno']);
         session()->flash('message', 'Usuario creado correctamente.');
         $this->resetCreateForm();
         $this->dispatch('close-user-create-modal');
-    }
-
-    public function updatedCreateAreaId($value): void
-    {
-        $this->createDepartmentId = null;
-        $this->createPositionId = null;
-
-        if (empty($value)) {
-            return;
-        }
-
-        $firstDepartment = Department::where('area_id', (int) $value)->orderBy('name')->value('id');
-        $this->createDepartmentId = $firstDepartment ? (int) $firstDepartment : null;
-
-        if ($this->createDepartmentId) {
-            $this->updatedCreateDepartmentId($this->createDepartmentId);
-        }
-    }
-
-    public function updatedCreateDepartmentId($value): void
-    {
-        $this->createPositionId = null;
-
-        if (empty($value)) {
-            return;
-        }
-
-        $firstPosition = Position::where('department_id', (int) $value)->orderBy('name')->value('id');
-        $this->createPositionId = $firstPosition ? (int) $firstPosition : null;
     }
 
     public function resetPassword(int $userId): void
@@ -457,16 +413,19 @@ class UsersIndex extends Component
 
         $user = User::findOrFail((int) $this->editingUserId);
 
+        $this->editEmail = trim((string) ($this->editEmail ?? ''));
+        $this->editPhone = $this->nullableString($this->editPhone);
+
         $validated = $this->validate([
             'editName' => ['required', 'string', 'max:255'],
             'editApPaterno' => ['required', 'string', 'max:255'],
             'editApMaterno' => ['required', 'string', 'max:255'],
             'editUsuario' => ['required', 'string', 'max:255', 'unique:users,usuario,' . $user->id],
-            'editPhone' => ['nullable', 'string', 'size:10'],
-            'editEmail' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'editAreaId' => ['required', 'integer', 'exists:areas,id'],
-            'editDepartmentId' => ['required', 'integer', 'exists:departments,id'],
-            'editPositionId' => ['required', 'integer', 'exists:positions,id'],
+            'editPhone' => ['nullable', 'string', 'size:10', Rule::unique('users', 'phone')->ignore($user->id)],
+            'editEmail' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'editAreaId' => ['nullable', 'integer', 'exists:areas,id'],
+            'editDepartmentId' => ['nullable', 'integer', 'exists:departments,id'],
+            'editPositionId' => ['nullable', 'integer', 'exists:positions,id'],
             'editCampaignId' => ['nullable', 'integer', 'exists:campaigns,id'],
             'editRoleId' => [$this->canSelectRole ? 'required' : 'nullable', 'integer', 'exists:roles,id'],
             'editSedes' => ['nullable', 'array'],
@@ -476,20 +435,9 @@ class UsersIndex extends Component
         ], [
             'editRoleId.required' => 'Selecciona un rol para el usuario.',
             'editPassword.same' => 'La confirmación de contraseña no coincide.',
+            'editEmail.unique' => 'Ese correo electrónico ya está registrado.',
+            'editPhone.unique' => 'Ese número de teléfono ya está registrado.',
         ]);
-
-        $department = Department::findOrFail((int) $validated['editDepartmentId']);
-        $position = Position::findOrFail((int) $validated['editPositionId']);
-
-        if ((int) $position->department_id !== (int) $department->id) {
-            $this->addError('editPositionId', 'El puesto seleccionado no pertenece al departamento elegido.');
-            return;
-        }
-
-        if ($department->area_id !== null && (int) $department->area_id !== (int) $validated['editAreaId']) {
-            $this->addError('editDepartmentId', 'El departamento seleccionado no pertenece al área elegida.');
-            return;
-        }
 
         $payload = [
             'name' => trim($validated['editName']),
@@ -497,10 +445,10 @@ class UsersIndex extends Component
             'ap_materno' => trim($validated['editApMaterno']),
             'usuario' => trim($validated['editUsuario']),
             'phone' => $validated['editPhone'],
-            'email' => $validated['editEmail'],
-            'area_id' => $validated['editAreaId'],
-            'department_id' => $validated['editDepartmentId'],
-            'position_id' => $validated['editPositionId'],
+            'email' => trim($validated['editEmail']),
+            'area_id' => $validated['editAreaId'] ?? null,
+            'department_id' => $validated['editDepartmentId'] ?? null,
+            'position_id' => $validated['editPositionId'] ?? null,
             'campaign_id' => $validated['editCampaignId'] ?? null,
         ];
 
@@ -524,35 +472,6 @@ class UsersIndex extends Component
         session()->flash('message', 'Usuario actualizado.');
         $this->resetEditForm();
         $this->dispatch('close-user-edit-modal');
-    }
-
-    public function updatedEditAreaId($value): void
-    {
-        $this->editDepartmentId = null;
-        $this->editPositionId = null;
-
-        if (empty($value)) {
-            return;
-        }
-
-        $firstDepartment = Department::where('area_id', (int) $value)->orderBy('name')->value('id');
-        $this->editDepartmentId = $firstDepartment ? (int) $firstDepartment : null;
-
-        if ($this->editDepartmentId) {
-            $this->updatedEditDepartmentId($this->editDepartmentId);
-        }
-    }
-
-    public function updatedEditDepartmentId($value): void
-    {
-        $this->editPositionId = null;
-
-        if (empty($value)) {
-            return;
-        }
-
-        $firstPosition = Position::where('department_id', (int) $value)->orderBy('name')->value('id');
-        $this->editPositionId = $firstPosition ? (int) $firstPosition : null;
     }
 
     public function cancelEditUser(): void
@@ -912,23 +831,6 @@ class UsersIndex extends Component
         $this->editSedes = [];
         $this->editPassword = null;
         $this->editPasswordConfirmation = null;
-    }
-
-    /**
-     * Filtra una colección por FK; si no hay resultados con ese FK
-     * (p.ej. todos tienen NULL), devuelve la colección completa como fallback.
-     */
-    private function filterCascade($collection, string $foreignKey, $parentId)
-    {
-        if ($parentId === null) {
-            return $collection->values();
-        }
-
-        $filtered = $collection->filter(
-            fn ($item) => (int) $item->{$foreignKey} === (int) $parentId
-        )->values();
-
-        return $filtered->isNotEmpty() ? $filtered : $collection->values();
     }
 
     private function findHeaderIndex(array $headerMap, array $aliases): ?int

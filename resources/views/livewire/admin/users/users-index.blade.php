@@ -281,12 +281,12 @@
                                         @error('createUsuario')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                     </div>
                                     <div class="form-group col-md-4">
-                                        <label>Teléfono</label>
+                                        <label>Teléfono <span class="text-muted font-weight-normal">(opcional, único)</span></label>
                                         <input type="text" class="form-control @error('createPhone') is-invalid @enderror" wire:model="createPhone" maxlength="10" placeholder="Ej. 5512345678">
                                         @error('createPhone')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                     </div>
                                     <div class="form-group col-md-4">
-                                        <label>Email</label>
+                                        <label>Correo electrónico</label>
                                         <input type="email" class="form-control @error('createEmail') is-invalid @enderror" wire:model="createEmail" placeholder="Ej. juan.perez@ecd.mx">
                                         @error('createEmail')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                     </div>
@@ -299,9 +299,9 @@
                             <div class="card-body pb-1">
                                 <div class="row">
                                     <div class="form-group col-md-4">
-                                        <label>Área</label>
-                                        <select class="custom-select @error('createAreaId') is-invalid @enderror" wire:model.live="createAreaId">
-                                            <option value="">Seleccione un área...</option>
+                                        <label>Área <span class="text-muted font-weight-normal">(opcional)</span></label>
+                                        <select class="custom-select @error('createAreaId') is-invalid @enderror" wire:model="createAreaId">
+                                            <option value="">Sin área</option>
                                             @foreach($areas as $area)
                                                 <option value="{{ $area->id }}">{{ $area->name }}</option>
                                             @endforeach
@@ -309,9 +309,9 @@
                                         @error('createAreaId')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                     </div>
                                     <div class="form-group col-md-4">
-                                        <label>Departamento</label>
-                                        <select class="custom-select @error('createDepartmentId') is-invalid @enderror" wire:model.live="createDepartmentId">
-                                            <option value="">Seleccione un departamento...</option>
+                                        <label>Departamento <span class="text-muted font-weight-normal">(opcional)</span></label>
+                                        <select class="custom-select @error('createDepartmentId') is-invalid @enderror" wire:model="createDepartmentId">
+                                            <option value="">Sin departamento</option>
                                             @foreach($departments as $department)
                                                 <option value="{{ $department->id }}">{{ $department->name }}</option>
                                             @endforeach
@@ -319,9 +319,9 @@
                                         @error('createDepartmentId')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                     </div>
                                     <div class="form-group col-md-4">
-                                        <label>Puesto</label>
+                                        <label>Puesto <span class="text-muted font-weight-normal">(opcional)</span></label>
                                         <select class="custom-select @error('createPositionId') is-invalid @enderror" wire:model="createPositionId">
-                                            <option value="">Seleccione un puesto...</option>
+                                            <option value="">Sin puesto</option>
                                             @foreach($positions as $position)
                                                 <option value="{{ $position->id }}">{{ $position->name }}</option>
                                             @endforeach
@@ -425,12 +425,12 @@
                                         @error('editUsuario')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                     </div>
                                     <div class="form-group col-md-4">
-                                        <label>Teléfono</label>
+                                        <label>Teléfono <span class="text-muted font-weight-normal">(opcional, único)</span></label>
                                         <input type="text" class="form-control @error('editPhone') is-invalid @enderror" wire:model="editPhone" maxlength="10" placeholder="Ej. 5512345678">
                                         @error('editPhone')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                     </div>
                                     <div class="form-group col-md-4">
-                                        <label>Email</label>
+                                        <label>Correo electrónico</label>
                                         <input type="email" class="form-control @error('editEmail') is-invalid @enderror" wire:model="editEmail" placeholder="Ej. juan.perez@ecd.mx">
                                         @error('editEmail')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                     </div>
@@ -443,9 +443,9 @@
                             <div class="card-body pb-1">
                                 <div class="row">
                                     <div class="form-group col-md-4">
-                                        <label>Área</label>
-                                        <select class="custom-select @error('editAreaId') is-invalid @enderror" wire:model.live="editAreaId">
-                                            <option value="">Seleccione un área...</option>
+                                        <label>Área <span class="text-muted font-weight-normal">(opcional)</span></label>
+                                        <select class="custom-select @error('editAreaId') is-invalid @enderror" wire:model="editAreaId">
+                                            <option value="">Sin área</option>
                                             @foreach($areas as $area)
                                                 <option value="{{ $area->id }}">{{ $area->name }}</option>
                                             @endforeach
@@ -453,9 +453,9 @@
                                         @error('editAreaId')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                     </div>
                                     <div class="form-group col-md-4">
-                                        <label>Departamento</label>
-                                        <select class="custom-select @error('editDepartmentId') is-invalid @enderror" wire:model.live="editDepartmentId">
-                                            <option value="">Seleccione un departamento...</option>
+                                        <label>Departamento <span class="text-muted font-weight-normal">(opcional)</span></label>
+                                        <select class="custom-select @error('editDepartmentId') is-invalid @enderror" wire:model="editDepartmentId">
+                                            <option value="">Sin departamento</option>
                                             @foreach($editDepartments as $department)
                                                 <option value="{{ $department->id }}">{{ $department->name }}</option>
                                             @endforeach
@@ -463,9 +463,9 @@
                                         @error('editDepartmentId')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                     </div>
                                     <div class="form-group col-md-4">
-                                        <label>Puesto</label>
+                                        <label>Puesto <span class="text-muted font-weight-normal">(opcional)</span></label>
                                         <select class="custom-select @error('editPositionId') is-invalid @enderror" wire:model="editPositionId">
-                                            <option value="">Seleccione un puesto...</option>
+                                            <option value="">Sin puesto</option>
                                             @foreach($editPositions as $position)
                                                 <option value="{{ $position->id }}">{{ $position->name }}</option>
                                             @endforeach
